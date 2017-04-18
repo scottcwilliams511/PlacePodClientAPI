@@ -1,0 +1,6 @@
+/Services/IOTService/.ntvs_analysis.dat
+.idea/*
+/Services/IOTService/obj/Debug
+/Services/IOTService/bin
+node_modules/
+typings/
