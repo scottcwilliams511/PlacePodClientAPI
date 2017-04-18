@@ -71,13 +71,13 @@ namespace PlacePodApiExample
             req.Headers["X-User-Id"] = userId;
 
             //Get the sensor data response
-            res = req.GetResponseAsync().Result; 
+            res = req.GetResponseAsync().Result;
             receiveStream = res.GetResponseStream();
             reader = new StreamReader(receiveStream, Encoding.UTF8);
             content = reader.ReadToEnd();
 
             dynamic sensor = JsonConvert.DeserializeObject(content);
-                       
+
 
             /*
              sensor.data = {
