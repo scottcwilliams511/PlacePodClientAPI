@@ -21,7 +21,7 @@ namespace PlacePodApiExample
             // The placepod API is undocumented and subject to change
             // Fully documented API comming soon!
             // 
-
+            // This client does no error handling! please check return codes! 200 is ok, 401 is  unauthorized 403 forbidden etc
 
             string user = "placepod@pnicorp.com";
             string pass = "placepod";
@@ -52,14 +52,6 @@ namespace PlacePodApiExample
             ///You'll need to save the userId and token on the client, for subsequent authenticated requests.
             var authToken = auth.data.authToken;
             var userId = auth.data.userId;
-
-            /* Logging Out
-             * You also have an authenticated POST /api/logout endpoint for logging a user out.
-             * If successful, the auth token that is passed in the request header will be 
-             * invalidated (removed from the user account), so it will not work in any subsequent
-             * requests.
-             */
-
 
             /* Authenticated Calls
              * For any endpoints that require the default authentication, you must include the userId and authToken with each request under the following headers:
@@ -99,20 +91,43 @@ namespace PlacePodApiExample
             }
             */
             //All your api's are belong to us. 
-            Console.WriteLine("_id:" + sensor._id);
-            Console.WriteLine("sensorId:" + sensor.sensorId);
-            Console.WriteLine("parkingSpace:" + sensor.parkingSpace);
-            Console.WriteLine("parkingId:" + sensor.parkingId);
-            Console.WriteLine("location:" + sensor.location);
-            Console.WriteLine("installationDate:" + sensor.installationDate);
-            Console.WriteLine("status:" + SensorStatus((int)sensor.status));
-            Console.WriteLine("lat:" + sensor.lat);
-            Console.WriteLine("lon:" + sensor.lon);
-            Console.WriteLine("createdAt:" + sensor.createdAt);
-            Console.WriteLine("hostFirmware:" + sensor.hostFirmware);
-            Console.WriteLine("sensorFirmware:" + sensor.sensorFirmware);
-            Console.WriteLine("parkingName:" + sensor.parkingName);
-            Console.WriteLine("validationInProcess:" + sensor.validationInProcess);
+            Console.WriteLine("_id:" + sensor._id); // db id of sensor
+            Console.WriteLine("sensorId:" + sensor.sensorId); // id of sensor
+            Console.WriteLine("parkingSpace:" + sensor.parkingSpace); // name of parking space
+            Console.WriteLine("parkingId:" + sensor.parkingId); // id of parking lot
+            Console.WriteLine("location:" + sensor.location); // not used
+            Console.WriteLine("installationDate:" + sensor.installationDate); // not used
+            Console.WriteLine("status:" + SensorStatus((int)sensor.status)); //Sensor status. 1= occupied 2=vacant 
+            Console.WriteLine("lat:" + sensor.lat);  // lon entered in UI
+            Console.WriteLine("lon:" + sensor.lon); // lat entered in UI
+            Console.WriteLine("createdAt:" + sensor.createdAt); // date this sensor was added to the UI
+            Console.WriteLine("hostFirmware:" + sensor.hostFirmware); // firmware of M0+ host
+            Console.WriteLine("sensorFirmware:" + sensor.sensorFirmware); // firmware of RM3100 sensor module
+            Console.WriteLine("parkingName:" + sensor.parkingName); // parking lot
+            Console.WriteLine("validationInProcess:" + sensor.validationInProcess); // has the validation button been pushed (internal PNI data logging)
+
+
+
+            /* Logging Out
+             * You also have an authenticated POST /api/logout endpoint for logging a user out.
+             * If successful, the auth token that is passed in the request header will be 
+             * invalidated (removed from the user account), so it will not work in any subsequent
+             * requests.
+             */
+            
+            // Security risk if you do not logout as tokens never expire            
+            req = WebRequest.Create(server + "/api/logout");
+            req.Headers["X-Auth-Token"] = authToken;
+            req.Headers["X-User-Id"] = userId;
+
+            //Get the sensor data response
+            res = req.GetResponseAsync().Result;
+            receiveStream = res.GetResponseStream();
+            reader = new StreamReader(receiveStream, Encoding.UTF8);
+            content = reader.ReadToEnd();
+            Console.WriteLine("Logged out : "+ content);
+
+
             Console.WriteLine("");
             Console.WriteLine("Press Any Key to Continue...");
             Console.ReadKey();
