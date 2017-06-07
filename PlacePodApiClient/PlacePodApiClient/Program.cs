@@ -20,7 +20,7 @@ namespace PlacePodApiExample
         // click on settings > REST API 
         // Click GENERATE API KEY 
         // Copy and paste API Key here.
-        static string API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJjb21wYW5pZXNBY2NvdW50c0lkIiwidW5pcXVlX25hbWUiOiJzUndUUkRNS2JlZTNZcWdyeiIsIm5iZiI6MTQ5Njg3MTU1OSwiZXhwIjoxNjU0NjM3OTU5LCJpYXQiOjE0OTY4NzE1NTksImlzcyI6Imh0dHBzOi8vd3d3LnBuaWNvcnAuY29tIiwiYXVkIjoiaHR0cHM6Ly93d3cucG5pY29ycC5jb20ifQ.U4A_i1JIYw9LU3jyP8kim9Nt-2bTV_ugQAjLcPVW34E";
+        static string API_KEY = "";
 
         static void Main(string[] args)
         {
