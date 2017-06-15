@@ -13,7 +13,7 @@ namespace PlacePodApiExample
 {
     class Program
     {
-        static string API_SERVER = "https://api-dev.pnicloud.com";
+        static string API_SERVER = "https://api.pnicloud.com";
 
         // Rest API is documented at https://api.pnicloud.com
         // login to PNI cloud account at https://parking.pnicloud.com
