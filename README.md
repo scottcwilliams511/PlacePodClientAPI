@@ -28,7 +28,9 @@ The Rest API may be invoked at any time retrieve sensor status, and history valu
  - Click the **Generate Credentials** button.
  - Copy Username, password and topic into MQTT Client.
  - MQTT Connection is on port 8883 and requires TLS configuration.
-	 - For example, use the MQTTfx client to test connection.
+ - Client library may require trusted CA certificate.
+ 	- Download [Starfield Services Root Certificate Authority - G2](https://www.amazontrust.com/repository/SFSRootCAG2.pem) . 
+	- For example, use the MQTTfx client to test connection.
 		 - Check "Enable TLS" under SSL/TLS flag
 		 - Enter username/password under "User credentials"
 		 - Click Generate Client ID		 
