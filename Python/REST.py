@@ -1,12 +1,14 @@
-# -------------------------------------------------#
-# Python WEB API client                            #
-# File: Program.py                                 #
-# Author: Scott Williams swilliams@pnicorp.com     #
-# Date: June 8th, 2017                             #
-# Developed in: PyCharm Community Edition 2016.3.2 #
-# Project interpreter: 3.5.0                       #
-# Tests the Rest Web API for Placepod              #
-#--------------------------------------------------#
+# --------------------------------------------------#
+# Python WEB API client                             #
+# File: Program.py                                  #
+# Author: Scott Williams swilliams@pnicorp.com      #
+# Date: June 8th, 2017                              #
+# Developed in: PyCharm Community Edition 2016.3.2  #
+# Project interpreter: 3.5.0                        #
+# Tests the Rest Web API for Placepod. This program #
+# assumes that the retried data will conform to the #
+# below object fields. Program may crash otherwise  #
+#-------------------------------------------------- #
 
 # Used to make get requests to the api
 import requests
@@ -71,6 +73,16 @@ def get(urlPath):
     # Include the api key into the header
     headers = {'X-API-KEY': API_KEY}
     response = requests.get(url, headers=headers)
+
+    if response.status_code == 401:
+        print("Error: \"HTTP Error 401\" - Unauthorized: Access is denied due to invalid credentials.")
+        return 0
+
+    if response.status_code == 404:
+        print("Error: \"HTTP Error 404\" - Not Found.")
+        return 0
+
+    print("Successful connection...")
     return response.content
 
 
@@ -83,7 +95,22 @@ def post(urlPath, data):
     # Include the api key into the header
     # Must set content-type or else a 415 responce error will occur
     headers = {'X-API-KEY': API_KEY, 'content-type': 'application/json; charset=utf-8'}
+
     response = requests.post(url, data=data, headers=headers)
+
+    if response.status_code == 401:
+        print("Error: \"HTTP Error 401\" - Unauthorized: Access is denied due to invalid credentials.")
+        return 0
+
+    if response.status_code == 404:
+        print("Error: \"HTTP Error 404\" - Not Found.")
+        return 0
+
+    if response.status_code == 415:
+        print("Error: \"HTTP Error 415\" - Unsupported media type")
+        return 0
+
+    print("Successful connection...")
     return response.content
 
 
@@ -93,8 +120,17 @@ def main():
     # Make the api get call
     result = get("/api/parking-lots")
 
+    # Stop running if an error occurs during the get call
+    if result == 0:
+        return
+
     # Get returns a "byte string" which needs to be decoded for use with json
     result = result.decode('utf_8')
+
+    # Stop running if the get call returns empty JSON
+    if result == '':
+        print("Error: Get request returned no data")
+        return
 
     # Breaks the json into a list of ParkingLot objects
     payload = json.loads(result, object_hook= createParkingLotPayload)
@@ -111,8 +147,17 @@ def main():
     # Sample sensor post request with no filters applied
     result = post("/api/sensors", "{}")
 
+    # Stop running if an error occurs during the post call
+    if result == 0:
+        return
+
     # Post returns a "byte string" which needs to be decoded for use with json
     result = result.decode('utf_8')
+
+    # Stop running if the post call returns empty JSON
+    if result == '':
+        print("Error: Post request returned no data")
+        return
 
     # Breaks the json into a list of Sensor objects
     payload = json.loads(result, object_hook= createSensorPayload)

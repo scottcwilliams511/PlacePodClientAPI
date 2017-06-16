@@ -23,6 +23,8 @@ import json
 #                      4) Click Show Password"
 #                      5) Copy all four values into the respective fields below
 # For serverURL, don't include "mqtts://" or ":8883", otherwise the connection will not work
+
+
 serverURL = ""
 topic = ""
 username = ""
@@ -31,7 +33,13 @@ password = ""
 # Port used
 port = 8883
 
+# Dynamic dictionary object used to publish results
+class Payload(object):
+    def __init__(self, j):
+        self.__dict__ = json.loads(j)
 
+# Old non dynamic code for reference
+'''
 # Api value fields for a sensor as an object
 class SensorInfo(object):
     def __init__(self, sensorId, parkingSpace, network, location, installationDate,
@@ -62,56 +70,110 @@ class SensorInfo(object):
 
 # Create a SensorInfo object using the dictionary grabbed from the JSON
 def createSensorInfoPayload(dct):
-    return SensorInfo(dct['sensorId'], dct['parkingSpace'], dct['network'], dct['location'],
-                      dct['installationDate'],dct['lat'], dct['lon'], dct['createdAt'], dct['hostFirmware'],
+
+    # This was going to set missing packet fields to NULL so the program wouldn't crash
+    if not 'network' in dct:
+        network = ""
+    else:
+        network = dct['network']
+
+    if not 'hostFirmware' in dct:
+        hostFirmware = ""
+    else:
+        hostFirmware = dct['hostFirmware']  # Switched to dynamic object use at this point
+
+    return SensorInfo(dct['sensorId'], dct['parkingSpace'], network, dct['location'],
+                      dct['installationDate'],dct['lat'], dct['lon'], dct['createdAt'], hostFirmware,
                       dct['sensorFirmware'], dct['parkingName'], dct['validationInProcess'], dct['GatewayTime'],
                       dct['SENtralTime'], dct['ServerTime'], dct['CarPresence'], dct['Confidence'], dct['Temperature'],
                       dct['Battery'], dct['status'])
-
+'''
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, rc):
+
+    # Connection code 0 works
     print("Connected with result code " +str(rc))
+
+    if rc == 5:
+        print("Error: Invalid username or password!")
+        exit(1)
+
+    # The other possible connection codes are not documented, so warn the user that something may have happened
+    if rc != 0:
+        print("Warning: Connected with code other than 0, errors may occur...")
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
+    print("\nWaiting on publish...\n")
     client.subscribe(topic)
 
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-
     result = msg.payload
 
     # MQTT returns a "byte string" which needs to be decoded for use with json
     result = result.decode('utf_8')
 
-    # Breaks the json into a list of Sensor objects
-    payload = json.loads(result, object_hook= createSensorInfoPayload)
+    # Don't popualte fields if JSON is empty
+    if result == '':
+        print("Error: Published returned empty data")
+        return
 
-    # Output each value from the packet
+    # Breaks the json into a list of Sensor objects
+    payload = Payload(result)
+
+    # Old non dynamic call create objects, again just left for reference
+    #payload = json.loads(result, object_hook= createSensorInfoPayload)
+
+    # Output each value from the packet, if the field is there
+    # Having there checks ensures that the script won't crash should a packet
+    # be missing a field it could have
     print("Packet contents")
-    print("sensorId: " + payload.sensorId)
-    print("parkingSpace: " + payload.parkingSpace)
-    print("network: " + payload.network)
-    print("location: " + payload.location)
-    print("installationDate: " + str(payload.installationDate))
-    print("lat: " + str(payload.lat))
-    print("lon: " + str(payload.lon))
-    print("createdAt: " + payload.createdAt)
-    print("hostFirmware: " + payload.hostFirmware)
-    print("sensorFirmware: " + payload.sensorFirmware)
-    print("parkingName: " + payload.parkingName)
-    print("validationInProcess: " + str(payload.validationInProcess))
-    print("GatewayTime: " + payload.GatewayTime)
-    print("SENtralTime: " + str(payload.SENtralTime))
-    print("ServerTime: " + payload.ServerTime)
-    print("CarPresence: " + str(payload.CarPresence))
-    print("Confidence: " + str(payload.Confidence))
-    print("Temperature: " + str(payload.Temperature))
-    print("Battery: " + str(payload.Battery))
-    print("status: " + payload.status)
+    if hasattr(payload, 'sensorId'):
+        print("sensorId: " + payload.sensorId)
+    if hasattr(payload, 'parkingSpace'):
+        print("parkingSpace: " + payload.parkingSpace)
+    if hasattr(payload, 'network'):
+        print("network: " + payload.network)
+    if hasattr(payload, 'location'):
+        print("location: " + payload.location)
+    if hasattr(payload, 'installationDate'):
+        print("installationDate: " + str(payload.installationDate))
+    if hasattr(payload, 'lat'):
+        print("lat: " + str(payload.lat))
+    if hasattr(payload, 'lon'):
+        print("lon: " + str(payload.lon))
+    if hasattr(payload, 'createdAt'):
+        print("createdAt: " + payload.createdAt)
+    if hasattr(payload, 'hostFirmware'):
+        print("hostFirmware: " + payload.hostFirmware)
+    if hasattr(payload, 'sensorFirmware'):
+        print("sensorFirmware: " + payload.sensorFirmware)
+    if hasattr(payload, 'parkingName'):
+        print("parkingName: " + payload.parkingName)
+    if hasattr(payload, 'validationInProcess'):
+        print("validationInProcess: " + str(payload.validationInProcess))
+    if hasattr(payload, 'GatewayTime'):
+        print("GatewayTime: " + payload.GatewayTime)
+    if hasattr(payload, 'SENtralTime'):
+        print("SENtralTime: " + str(payload.SENtralTime))
+    if hasattr(payload, 'ServerTime'):
+        print("ServerTime: " + payload.ServerTime)
+    if hasattr(payload, 'CarPresence'):
+        print("CarPresence: " + str(payload.CarPresence))
+    if hasattr(payload, 'Confidence'):
+        print("Confidence: " + str(payload.Confidence))
+    if hasattr(payload, 'Temperature'):
+        print("Temperature: " + str(payload.Temperature))
+    if hasattr(payload, 'Battery'):
+        print("Battery: " + str(payload.Battery))
+    if hasattr(payload, 'status'):
+        print("status: " + payload.status)
     print("")
+    print("Waiting on publish...")
+
 
 
 def main():
@@ -124,12 +186,30 @@ def main():
     client.on_message = on_message
 
     # Set the username and password for the broker
+    # Client ID must be unique otherwise if multiple users are using the same ID it will knock them off
+    # Since a client ID is not provided, paho randomly generates one for us giving a high probability of uniqueness
     client.username_pw_set(username,password)
+    print("Username and password successfully set!")
 
-    # Enables TLS
+    # Enable TLS
+    # On macOS it is sufficient to leave the parameter as a "0"
+    # If you are on another system or this does not work, then do the following:
+    # 1) Login to PNI cloud account at https://parking.pnicloud.com
+    # 2) Click on settings > MQTT API
+    # 3) Where it says "* SSL/TLS required", click on the Certificate Authority URL
+    # 4) Under "Root CAs" look for the certificate that has G2 in its name
+    # 5) On the right hand side, right click on PEM to save the certificate.
+    # 6) Put the .PEM file in the same directory as this script
+    # 7) Post the file name as an argument below
+    #    example:
+    #    client.tls_set("./SFSRootCAG2.pem")
+    #    or
+    #    client.tls_set(0)
     client.tls_set(0)
+    print("TLS successfully set!")
 
     # Establish the connection to the broker
+    print("Attempting to connect...")
     client.connect(serverURL, port, 60)
 
     # Blocking call that processes network traffic, dispatches callbacks and
