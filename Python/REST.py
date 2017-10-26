@@ -3,7 +3,7 @@
 # File: REST.py                                     #
 # Author: Scott Williams swilliams@pnicorp.com      #
 # Date: June 8th, 2017                              #
-# Last updated: September 11th, 2017                #
+# Last updated: October 26th, 2017                  #
 # Developed in: PyCharm Community Edition 2016.3.2  #
 # Project interpreter: 3.5.0                        #
 # Tests the Rest Web API for PlacePod. This program #
@@ -24,8 +24,8 @@ import json
 #                      2) Click on settings > REST API
 #                      3) Click "Re-Generate API Key"
 #                      4) Copy the API URL and the API Key into the below values
-API_SERVER = ""
-API_KEY = ""
+API_SERVER = "https://api-dev.pnicloud.com"
+API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJjb21wYW5pZXNBY2NvdW50c0lkIiwidW5pcXVlX25hbWUiOiJzUndUUkRNS2JlZTNZcWdyeiIsIm5iZiI6MTUwODQ0MDc5OSwiZXhwIjoxNjY2MjA3MTk5LCJpYXQiOjE1MDg0NDA3OTksImlzcyI6Imh0dHBzOi8vd3d3LnBuaWNvcnAuY29tIiwiYXVkIjoiaHR0cHM6Ly93d3cucG5pY29ycC5jb20ifQ.68GsWRpl6nDkGwPWEPgLNvXAwG3WbBhmDOypGzAonoo"
 
 
 def main():
@@ -61,11 +61,19 @@ def main():
 #  10) Remove the 'test' gateway                                                     #
 #  11) Remove the 'test' sensor                                                      #
 #  12) Remove the 'test' parking lot                                                 #
+# NOTE: If all tasks complete, then there will be no test data left on your account  #
+# from this test application.                                                        #
+#                                                                                    #
+# If a task fails, the error message will be displayed in the output, and the        #
+# program will attempt to go to the next task. It is advised to stop the program     #
+# since several tasks rely on the results of the previous tasks. You will also want  #
+# to remove any test data left on your account due to the insert calls. This can be  #
+# done on either the API's Swagger page or through the parking Cloud.                #
 #------------------------------------------------------------------------------------#
 def getInsertUpdateRemoveTests():
 
 #----- Get Parking Lots -----
-    # Test /api/parking-lots
+    # Test '/api/parking-lots'
     parkingLots = getParkingLots()
     # Sample iteration of retrieved parking lot data
     print("Got " + str(len(parkingLots)) + " Parking Lots: ")
@@ -75,7 +83,7 @@ def getInsertUpdateRemoveTests():
     wait()
 
 #----- Get Sensors -----
-    # Test /api/sensors
+    # Test '/api/sensors'
     sensors = getSensors()
     # Sample iteration of retrieved sensor data
     print("Got " + str(len(sensors)) + " Sensors: ")
@@ -86,7 +94,7 @@ def getInsertUpdateRemoveTests():
     wait()
 
 #----- Get Gateways -----
-    # Test /api/gateways
+    # Test '/api/gateways'
     gateways= getGateways()
     # Sample iteration of retrieved gateway data
     print("Got " + str(len(gateways)) + " Gateways: ")
@@ -104,7 +112,7 @@ def getInsertUpdateRemoveTests():
     params +=   " 'latitude': '33.810280507079874', "
     params +=   " 'longitude': '-117.9189795255661' "
     params += "}"
-    # Test /api/parking-lot/insert
+    # Test '/api/parking-lot/insert'
     insertParkingLot(params)
     # Get the id of the parking lot inserted above for further operations
     parkingLots = getParkingLots()
@@ -121,7 +129,7 @@ def getInsertUpdateRemoveTests():
     params +=   " 'id': '" + parkingLotId + "', "
     params +=   " 'parkingLotName': 'TEST: python-api-lot-update' "
     params += "}"
-    # Test /api/parking-lot/update
+    # Test '/api/parking-lot/update'
     updateParkingLot(params)
     wait()
 
@@ -137,7 +145,7 @@ def getInsertUpdateRemoveTests():
     params +=   " 'latitude':  33, "
     params +=   " 'longitude': -111 "
     params += "}"
-    # Test /api/sensor/insert
+    # Test '/api/sensor/insert'
     insertSensor(params)
     wait()
 
@@ -149,7 +157,7 @@ def getInsertUpdateRemoveTests():
     params +=   " 'latitude':  33.810280507079874, "
     params +=   " 'longitude': -117.9189795255661 "
     params += "}"
-    # Test /api/sensor/update
+    # Test '/api/sensor/update'
     updateSensor(params)
     wait()
 
@@ -160,7 +168,7 @@ def getInsertUpdateRemoveTests():
     params +=   " 'gatewayName':  'TEST: python-api-gateway-insert', "
     params +=   " 'parkingLotId': '" + parkingLotId + "' "
     params += "}"
-    # Test /api/gateway/insert
+    # Test '/api/gateway/insert'
     insertGateway(params)
     # Get the id of the gateway inserted above for further operations
     gateways = getGateways()
@@ -177,7 +185,7 @@ def getInsertUpdateRemoveTests():
     params +=   " 'id': '" + gatewayId + "', "
     params +=   " 'gatewayName': 'TEST: python-api-gateway-update' "
     params += "}"
-    # Test /api/gateway/update
+    # Test '/api/gateway/update'
     updateGateway(params)
     wait()
 
@@ -186,7 +194,7 @@ def getInsertUpdateRemoveTests():
     params =  "{"
     params +=   " 'id': '" + gatewayId + "' "
     params += "}"
-    # Test /api/gateway/remove
+    # Test '/api/gateway/remove'
     removeGateway(params)
     wait()
 
@@ -195,7 +203,7 @@ def getInsertUpdateRemoveTests():
     params =  "{"
     params +=   " 'sensorId': '" + sensorId + "', "
     params += "}"
-    # Test /api/sensor/remove
+    # Test '/api/sensor/remove'
     removeSensor(params)
     wait()
 
@@ -204,7 +212,7 @@ def getInsertUpdateRemoveTests():
     params =  "{"
     params +=   " 'id': '" + parkingLotId + "', "
     params += "}"
-    # Test /api/parkingLot/remove
+    # Test '/api/parkingLot/remove'
     removeParkingLot(params)
     wait()
 
@@ -218,15 +226,21 @@ def getInsertUpdateRemoveTests():
 # Description: This function tests non-CRUD sensor API functions and how to          #
 # properly call them. Note that while there can be used on a 'test' sensor that      #
 # doesn't actually exist, you will want to use this on a real installed sensor.      #
-# Some operations are not called as their implementation is identical to other       #
-# operations (read comments on 'enable transition state reporting' and 'set lora     #
-# wakeup interval.' The tasks that can be optionally performed are:                   #
+# You can see the results of this test on the Parking Cloud by going to the sensor's #
+# diagnostic information.                                                            #
+# The tasks that can be optionally performed are:                                    #
 #   1) Get sensor history                                                            #
 #   2) Send a recalibrate                                                            #
 #   3) Run a full BIST test (give up to 5 minutes for a response)                    #
 #   4) Send a Ping and wait for response (up to 5 minutes)                           #
 #   5) Send a force vacant                                                           #
-#   6) Send a set lora wakeup interval                                               #
+#   6) Send a force occupied                                                         #
+#   7) Send an enable transition state reporting                                     #
+#   8) Sen a disable transition state reporting                                      #
+#   9) Send a set lora wakeup interval to 5 minutes                                  #
+#  10) Send a set loRa Tx power call to 11dB                                         #
+#  11) Send a Tx spreading factor call to SF 7, BW 125 kHz                           #
+#  12) Send a set frequency sub band call to 902.3 kHz  - 903.7 kHz - 125k           #
 #                                                                                    #
 # NOTE: There are only so many requests that can be queued by a sensor at a time,    #
 # so it is suggested to not make rapid calls to the sensor and wait around a minute  #
@@ -245,7 +259,7 @@ def sensorOperations(sensorId):
     params +=   " 'startTime': '2017-09-08T01:00:00.000Z', "
     params +=   " 'endTime': '2017-09-08T01:10:00.000Z' "
     params += "}"
-    # Test /api/sensor/history
+    # Test '/api/sensor/history'
     # Requires a properly installed sensor
     userInput = input("Get Sensor History (y/n)? ")
     if userInput == "y" or userInput == "Y":
@@ -264,42 +278,99 @@ def sensorOperations(sensorId):
 #--- Recalibrate ---
     userInput = input("Recalibrate sensor (y/n)? ")
     if userInput == "y" or userInput == "Y":
+        # Test '/api/sensor/recalibrate'
         recalibrate(idParam)
         wait()
 
 #--- BIST ---
     userInput = input("Run basic internal self test (BIST) (y/n)? ")
     if userInput == "y" or userInput == "Y":
+        # Test '/api/sensor/initialize-bist' and '/api/sensor/bist-response/{SensorId}/{LastUpdated}'
         bist(idParam, sensorId)
         wait()
 
 #--- Ping Sensor ---
     userInput = input("Ping sensor (y/n)? ")
     if userInput == "y" or userInput == "Y":
+        # Test '/api/sensor/ping' and '/api/sensor/ping-response/{SensorId}/{LastUpdated}'
         ping(idParam, sensorId)
         wait()
 
 #--- Force Vacant ---
     userInput = input("Force car presence to vacant (y/n)? ")
     if userInput == "y" or userInput == "Y":
+        # Test '/api/sensor/force-vacant'
         forceVacant(idParam)
         wait()
 
-#--- Force occupied, enable/disable transition state reporting ---
-    # These are all implemented the same as 'Force Vacant', copy/paste code and change the api route
+#--- Force Occupied ---
+    userInput = input("Force are presence to occupied (y/n)? ")
+    if userInput == "y" or userInput == "Y":
+        # Test '/api/sensor/force-occupied'
+        forceOccupied(params)
+        wait()
+
+#--- Enable Transition State Reporting ---
+    userInput = input("Enable Transition State Reporting (y/n)? ")
+    if userInput == "y" or userInput == "Y":
+        # Test '/api/sensor/enable-transition-state-reporting'
+        enableTransitionStateReporting(params)
+        wait()
+
+#--- Disable transition state reporting ---
+    userInput = input("Disable Transition State Reporting (y/n)? ")
+    if userInput == "y" or userInput == "Y":
+        # Test '/api/sensor/disable-transition-state-reporting'
+        disableTransitionStateReporting(params)
+        wait()
+
 
 #--- Set LoRa Wakeup Interval ---
-    userInput = input("Set LoRa Wakeup Interval (y/n)?" )
+    userInput = input("Set LoRa Wakeup Interval to 5 minutes (y/n)?" )
     if userInput == "y" or userInput == "Y":
-        userInput = input("Enter time interval in minutes: ")
+        # Test 'api/sensor/set-lora-wakeup-interval'
         params =  "{"
         params +=   " 'sensorId': '" + sensorId + "', "
-        params +=   " 'payload': '" + userInput + "' "
+        params +=   " 'payload': 5 "
         params += "}"
         setLoraWakeupInterval(params)
+        wait()
 
-#--- Set tx power, tx sf, fsb ---
-    # These are all implemented the same as 'Set LoRa Wakeup Interval', copy/paste code and change the api route
+#--- Set LoRa Tx Power ---
+    userInput = input("Set LoRa Tx Power to 11 (y/n)? ")
+    if userInput == "y" or userInput == "Y":
+        # Carefully read the documentation on this function before using it since it can be dangerous!
+        # Test '/api/sensor/set-lora-tx-power'
+        params =  "{"
+        params +=   " 'sensorId': '" + sensorId + "', "
+        params +=   " 'payload': 11 "
+        params += "}"
+        setLoraTxPower(params)
+        wait()
+
+#--- Set Tx Spreading Factor ---
+    userInput = input("Set Tx Spreading Factor to SF 7, BW 125 kHz (y/n)? ")
+    if userInput == "y" or userInput == "Y":
+        # Carefully read the documentation on this function before using it since it can be dangerous!
+        # Test '/api/sensor/set-tx-spreading-factor'
+        params =  "{"
+        params +=   " 'sensorId': '" + sensorId + "', "
+        params +=   " 'payload': 6 "
+        params += "}"
+        setTxSpreadingFactor(params)
+        wait()
+
+#--- Set Frequency Sub Band ---
+    userInput = input("Set Frequency Sub Band to 902.3 kHz  -  903.7 kHz - 125k (y/n)? ")
+    if userInput == "y" or userInput == "Y":
+        # Carefully read the documentation on this function before using it since it can be dangerous!
+        # Test '/api/sensor/set-frequency-sub-band'
+        params =  "{"
+        params +=   " 'sensorId': '" + sensorId + "', "
+        params +=   " 'payload': 1 "
+        params += "}"
+        setFrequencySubBand(params)
+        wait()
 
 #---end sensorOperations
 
@@ -575,7 +646,6 @@ def bist(params, sensorId):
     print("")
 #---end bist
 
-
 #--- Ping ---
 # This function's implementation is very similar to BIST
 def ping(params, sensorId):
@@ -643,22 +713,41 @@ def forceVacant(params):
     # Stop running if an error occurs during the post call
     if result == "Exiting...":
         return
-    # If an error didn't occur, then the call was successful
     print("Force Vacant Sent")
 #---end forceVacant
 
 #--- Force Occupied ---
-# See forceVacant
+def forceOccupied(params):
+    print("Sending Force Occupied...")
+    # Make the post call
+    result = post("/api/sensor/force-occupied", params)
+    if result == "Exiting...":
+        return
+    print("Force Occupied Sent")
+#---end forceOccupied
 
 #--- Enable Transition State Reporting ---
-# See forceVacant
+def enableTransitionStateReporting(params):
+    print("Sending Enable Transition State Reporting...")
+    # Make the post call
+    result = post("/api/sensor/enable-transition-state-reporting", params)
+    if result == "Exiting...":
+        return
+    print("Enable Transition State Reporting Sent")
+#---end enableTransitionStateReporting
 
 #--- Disable Transition State Reporting ---
-# See forceVacant
+def disableTransitionStateReporting(params):
+    print("Sending Disable Transition State Reporting...")
+    # Make the post call
+    result = post('/api/sensor/disable-transition-state-reporting', params)
+    if result == "Exiting":
+        return
+    print("Disable Transition State Reporting Send")
+#---end disableTransitionStateReporting
 
 #--- Set LoRa Wakeup Interval ---
-# Note: The following api calls are all implemented the same as this one, just changing out the api route
-#  1) /api/sensor/set-lora-tx-power
+#  1)
 #  2) /api/sensor/set-tx-spreading-factor
 #  3) /api/sensor/set-frequency-sub-band
 def setLoraWakeupInterval(params):
@@ -668,21 +757,39 @@ def setLoraWakeupInterval(params):
     # Stop running if an error occurs during the post call
     if result == "Exiting...":
         return
-    # If an error didn't occur, then the call was successful
     print("Set LoRa Wakeup Interval Sent")
 #---end setLoraWakeupInterval
 
 #--- Set LoRa Tx Power ---
-# See setLoraWakeupInterval
-# Also carefully read the documentation on this function before using it since it can be dangerous!
+def setLoraTxPower(params):
+    print("Sending Set LoRa Tx Power...")
+    # Make the post call
+    result = post("/api/sensor/set-lora-tx-power", params)
+    # Stop running if an error occurs during the post call
+    if result == "Exiting...":
+        return
+    print("Set LoRa Tx Power Sent")
+#---end setLoraTxPower
 
 #--- Set Tx Spreading Factor ---
-# See setLoraWakeupInterval
-# Also carefully read the documentation on this function before using it since it can be dangerous!
+def setTxSpreadingFactor(params):
+    print("Sending Set Tx Spreading Factor...")
+    # Make the post call
+    result = post("/api/sensor/set-tx-spreading-factor", params)
+    if result == "Exiting...":
+        return
+    print("Set Tx Spreading Factor Sent")
+#---end setTxSpreadingFactor
 
 #--- Set Frequency Sub Band ---
-# See setLoraWakeupInterval
-# Also carefully read the documentation on this function before using it since it can be dangerous!
+def setFrequencySubBand(params):
+    print("Sending Set Frequency Sub Band...")
+    # Make the post call
+    result = post("/api/sensor/set-frequency-sub-band", params)
+    if result == "Exiting...":
+        return
+    print("Set Frequency Sub Band Sent")
+#---end setFrequencySubBand
 
 #-----------------------------------------------------------------------------------
 
