@@ -24,8 +24,8 @@ import json
 #                      2) Click on settings > REST API
 #                      3) Click "Re-Generate API Key"
 #                      4) Copy the API URL and the API Key into the below values
-API_SERVER = "https://api-dev.pnicloud.com"
-API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJjb21wYW5pZXNBY2NvdW50c0lkIiwidW5pcXVlX25hbWUiOiJzUndUUkRNS2JlZTNZcWdyeiIsIm5iZiI6MTUwODQ0MDc5OSwiZXhwIjoxNjY2MjA3MTk5LCJpYXQiOjE1MDg0NDA3OTksImlzcyI6Imh0dHBzOi8vd3d3LnBuaWNvcnAuY29tIiwiYXVkIjoiaHR0cHM6Ly93d3cucG5pY29ycC5jb20ifQ.68GsWRpl6nDkGwPWEPgLNvXAwG3WbBhmDOypGzAonoo"
+API_SERVER = ""
+API_KEY = ""
 
 
 def main():
