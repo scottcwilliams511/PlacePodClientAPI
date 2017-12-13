@@ -1,11 +1,12 @@
 # -------------------------------------------------#
-# Python REST API client                           #
+# Python MQTT API client                           #
 # File: MQTT.py                                    #
 # Author: Scott Williams swilliams@pnicorp.com     #
 # Date: June 8th, 2017                             #
+# Last updated: December 13th, 2017                #
 # Developed in: PyCharm Community Edition 2016.3.2 #
 # Project interpreter: 3.5.0                       #
-# Tests the MQTT API for Placepod. Will run until  #
+# Tests the MQTT API for PlacePod. Will run until  #
 # user terminated.                                 #
 #--------------------------------------------------#
 
@@ -21,14 +22,19 @@ import json
 #                      2) Click on settings > MQTT API
 #                      3) Click "Re-Generate MQTT Credentials"
 #                      4) Click Show Password"
-#                      5) Copy all four values into the respective fields below
+#                      5) Copy all three values into the respective fields below
+#                      6) Select the topic you want to listen to. There are currently 2 options:
+#                           Car Presence Topic
+#                           Parking Lot Count Topic
+#                      7) Paste the listed topic into the topic field below.
 # For serverURL, don't include "mqtts://" or ":8883", otherwise the connection will not work
 
 
 serverURL = ""
-topic = ""
 username = ""
 password = ""
+
+topic = ""
 
 # Port used
 port = 8883
@@ -93,7 +99,7 @@ def createSensorInfoPayload(dct):
 def on_connect(client, userdata, rc):
 
     # Connection code 0 works
-    print("Connected with result code " +str(rc))
+    print("Connected with result code " + str(rc))
 
     if rc == 5:
         print("Error: Invalid username or password!")
@@ -116,7 +122,7 @@ def on_message(client, userdata, msg):
     # MQTT returns a "byte string" which needs to be decoded for use with json
     result = result.decode('utf_8')
 
-    # Don't popualte fields if JSON is empty
+    # Don't populate fields if JSON is empty
     if result == '':
         print("Error: Published returned empty data")
         return
@@ -131,6 +137,8 @@ def on_message(client, userdata, msg):
     # Having there checks ensures that the script won't crash should a packet
     # be missing a field it could have
     print("Packet contents")
+
+    # Fields for a 'Car Presence' packet
     if hasattr(payload, 'sensorId'):
         print("sensorId: " + payload.sensorId)
     if hasattr(payload, 'parkingSpace'):
@@ -171,12 +179,36 @@ def on_message(client, userdata, msg):
         print("Battery: " + str(payload.Battery))
     if hasattr(payload, 'status'):
         print("status: " + payload.status)
+
+    # Fields for a 'Parking Lot Count' packet
+    if hasattr(payload, 'totalNumberOfSpaces'):
+        print("totalNumberOfSpaces: " + str(payload.totalNumberOfSpaces))
+    if hasattr(payload, 'availableSpaces'):
+        print("availableSpaces: " + str(payload.availableSpaces))
+    if hasattr(payload, 'adjustedAvailableSpaces'):
+        print("adjustedAvailableSpaces: " + str(payload.adjustedAvailableSpaces))
+    if hasattr(payload, 'parkingLotId'):
+        print("parkingLotId: " + payload.parkingLotId)
+    if hasattr(payload, 'parkingLotClosed'):
+        print("parkingLotClosed: " + str(payload.parkingLotClosed))
+
     print("")
     print("Waiting on publish...")
 
 
-
 def main():
+    if serverURL == '':
+        print("serverURL not set!")
+        return
+    if username == '':
+        print("username not set!")
+        return
+    if password == '':
+        print("password not set!")
+        return
+    if topic == '':
+        print("topic not set!")
+        return
 
     # Create a MQTT client
     client = mqtt.Client()
@@ -188,7 +220,7 @@ def main():
     # Set the username and password for the broker
     # Client ID must be unique otherwise if multiple users are using the same ID it will knock them off
     # Since a client ID is not provided, paho randomly generates one for us giving a high probability of uniqueness
-    client.username_pw_set(username,password)
+    client.username_pw_set(username, password)
     print("Username and password successfully set!")
 
     # Enable TLS
@@ -210,13 +242,15 @@ def main():
 
     # Establish the connection to the broker
     print("Attempting to connect...")
-    client.connect(serverURL, port, 60)
+    try:
+        client.connect(serverURL, port, 60)
+    except:
+        print("Couldn't connect to serverURL address.")
+        return
 
     # Blocking call that processes network traffic, dispatches callbacks and
     # handles reconnecting.
     # Other loop*() functions are available that give a threaded interface and a
     # manual interface.
     client.loop_forever()
-
-
 main()
