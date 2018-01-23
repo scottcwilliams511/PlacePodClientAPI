@@ -51,7 +51,7 @@ def main():
         print("WAKEUP_INTERVAL is not defined.")
         return
 
-    userInput = input("Run mag data test? ")
+    userInput = input("Run mag data test (y/n)? ")
     if userInput == 'y' or userInput == 'Y':
         sensorId = input("Enter sensor ID: ")
         sensorId = str(sensorId)
@@ -70,15 +70,15 @@ def main():
         # this interval of time. Only then will we get the proper data we want.
         time.sleep(WAKEUP_INTERVAL)
 
-        test = magDataTestResponse(sensorId, timeSent)
-        if test is None:
+        responseJson = magDataTestResponse(sensorId, timeSent)
+        if responseJson is None:
             return
 
         # Formatting filenames can be weird...
         timeSent = timeSent.replace(":", ".")
         filename = sensorId + "_" + timeSent
         file = open("%s.txt" % filename, "w+")  # "w+" = write, create if doesn't exist
-        file.write()
+        file.write(responseJson)
         file.close()
         print("File " + "%s.txt" % filename + " created!")
 #---end main
