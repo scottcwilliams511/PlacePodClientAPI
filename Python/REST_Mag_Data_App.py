@@ -28,8 +28,10 @@
 # a new text file.                                  #
 #-------------------------------------------------- #
 
-# Used for timestamps and to make the app sleep
+# Used for timestamps
 from datetime import datetime
+
+# Used to make the app sleep
 import time
 
 # Used to make get requests to the api
@@ -95,11 +97,12 @@ def main():
         if responseJson is None:
             return
 
+        # If we didn't get any mag data, wait some time and try again
         magDataArr = responseJson[1].magDataArray
-
         while magDataArr is None or len(magDataArr) == 0:
             if (timeWaited >= TIMEOUT):
                 print("No response after " + timeWaited + "seconds... stopping...")
+                return
 
             print("Empty response - Waiting another " + str(POLL_INTERVAL) + " seconds for sensor to wakeup...")
             time.sleep(POLL_INTERVAL)
