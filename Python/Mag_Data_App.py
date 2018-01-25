@@ -260,7 +260,7 @@ def get(urlPath):
     headers = {'X-API-KEY': API_KEY}
     response = requests.get(url, headers=headers)
 
-    # If the status isn't 200, then an error occured!
+    # If the status isn't 200, then an error occurred!
     if response.status_code != 200:
         return errorHandler(response)
 
