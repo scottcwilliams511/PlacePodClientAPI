@@ -101,7 +101,7 @@ def main():
         magDataArr = responseJson[1].magDataArray
         while magDataArr is None or len(magDataArr) == 0:
             if (timeWaited >= TIMEOUT):
-                print("No response after " + timeWaited + "seconds... stopping...")
+                print("No response after " + str(timeWaited) + " seconds... stopping...")
                 return
 
             print("Empty response - Waiting another " + str(POLL_INTERVAL) + " seconds for sensor to wakeup...")
