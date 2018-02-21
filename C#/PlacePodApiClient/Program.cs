@@ -3,16 +3,21 @@ using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 using System;
+using PlacePodApiClient;
+using PlacePodApiClient.Gateways;
+using PlacePodApiClient.API_Methods;
+using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 /// <summary>
 /// 
 /// Implemented using Placepod API V1.1
-/// Last updated: October 26th, 2017
+/// Last updated: February 21th, 2018
 /// 
 /// The placepod API is undocumented and subject to change
 /// Fully documented API comming soon!
 /// 
-/// Unline the python application, the actual error message seems to get lost,
+/// Unlike the python application, the actual error message seems to get lost,
 /// so all we get here is a internal 500 error if something blows up like 
 /// a bad sensor ID. Errors can be confirmed by entering the same request
 /// that caused the error on the API's Swagger page.
@@ -20,10 +25,9 @@ using System;
 /// </summary>
 /// <author>Byron Whitlock bwhitlock@pnicorp.com</author>
 /// <author>Scott Williams swilliams@pnicorp.com</author>
-namespace PlacePodApiExample
-{
-    class Program
-    {
+namespace PlacePodApiExample {
+    public class Program {
+
         // Rest API is documented at https://api.pnicloud.com
 
         // To get these values:
@@ -31,32 +35,53 @@ namespace PlacePodApiExample
         //   2) click on settings > REST API 
         //   3) Click GENERATE API KEY 
         //   4) Copy the API URL and the API key into the below values
-        static string API_SERVER = "";
-        static string API_KEY = "";
+        private static readonly string API_SERVER = "https://api-dev.pnicloud.com";
+        private static readonly string API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJjb21wYW5pZXNBY2NvdW50c0lkIiwidW5pcXVlX25hbWUiOiJzUndUUkRNS2JlZTNZcWdyeiIsIm5iZiI6MTUxMjUwNDUzMSwiZXhwIjoxNjcwMjcwOTMxLCJpYXQiOjE1MTI1MDQ1MzEsImlzcyI6Imh0dHBzOi8vd3d3LnBuaWNvcnAuY29tIiwiYXVkIjoiaHR0cHM6Ly93d3cucG5pY29ycC5jb20ifQ.1EvN7VThWGBRY2NzSZsL6DhT4rFoI6wYSEpQskjCXD4";
+        private static Http HttpClient;
+
 
         /// <summary>
         /// Main function that initializes the two sample applications
         /// </summary>
         /// <param name="args"></param>
-        static void Main(string[] args)
-        {
-            Console.WriteLine("This first sample application will test the get, insert, update, and remove functions" +
-                " of 'gateways', 'parking-lots', and sensors'.");
-            Console.WriteLine("Run first sample application (y/n)? ");
-            var input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-                FirstApp();
+        static void Main(string[] args) {
+            // Make sure these values are set. Program can't run without them!
+            if (string.IsNullOrWhiteSpace(API_SERVER)) {
+                Console.WriteLine("API_SERVER variable not set!");
+                return;
+            } else if (string.IsNullOrWhiteSpace(API_KEY)) {
+                Console.WriteLine("API_KEY variable not set!");
+                return;
+            }
 
+            HttpClient = new Http(API_SERVER, API_KEY);
+
+            // Program 1
+            Console.WriteLine("This first sample application will test the get, insert, update, and remove functions" +
+                   " of 'gateways', 'parking-lots', and sensors'.");
+            Console.WriteLine("Run first sample application (y/n)? ");
+            string input = Console.ReadLine();
+            if (input == "y" || input == "Y") {
+                Task.Run(async () => {
+                    await FirstApp();
+                }).GetAwaiter().GetResult();
+            }
+
+            
+
+
+            // TODO finish this and all methods related to it....
+            // Program 2
             Console.WriteLine("This second sample application will test the other 'sensor' operaions. " +
                 "A sensor ID must be provided to proceed.");
             Console.WriteLine("Run second sample application (y/n)? ");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
+            if (input == "y" || input == "Y") {
                 Console.WriteLine("Enter sensor ID: ");
                 input = Console.ReadLine();
                 SecondApp(input);
             }
+
         }
 
 
@@ -79,130 +104,187 @@ namespace PlacePodApiExample
         /// account from this test application.
         /// 
         /// If a task fails, the program will stop since several calls rely on other calls.
-        /// Since error messages from the API are not available here, you may want to run
-        /// the command that crashed the program on the API's swagger page. You will also
-        /// want to remove any test data left on your account due to the insert calls.
+        /// You will also want to remove any test data left on your account due to the insert calls.
         /// This can be done on either the API's swagger page or through the Parking Cloud.
         /// </summary>
-        static void FirstApp()
-        {   // All of this is wrapped in a try/catch because if one operation fails it
-            // can cause the rest of the first app to not behaive as desired.
-            try
-            {   /// Test /api/parking-lots
-                dynamic lots = GetParkingLots();
-                Console.WriteLine(" Got " + lots.Count + " Parking Lots: ");
-                foreach (var lot in lots)
+        public async static Task FirstApp() {
+            // All of this is wrapped in a try/catch because if one operation fails it
+            // can cause the rest of the first app to not behave as desired.
+            try {
+
+                GatewayMethods gatewayMethods = new GatewayMethods(HttpClient);
+                ParkingLotMethods parkingLotMethods = new ParkingLotMethods(HttpClient);
+                SensorMethods sensorMethods = new SensorMethods(HttpClient);
+
+
+                // Fetch all parking lots
+                Console.WriteLine("Testing '/api/parking-lots'");
+                dynamic lots = await parkingLotMethods.GetParkingLots();
+                Console.WriteLine("Got " + lots.Count + " Parking Lots: ");
+                foreach (var lot in lots) {
                     Console.WriteLine("--> " + lot.id + ": " + lot.name + " ");
+                }
                 Console.WriteLine();
 
-                // JSON filter
-                var filter = "{}";
-                // filter = "{ 'parkingLotId': 'string' }"        // filter on parking lot
-                // filter = "{ 'sensorId': '008000000000b0dd'}"   // filter on sensor id
 
-                /// Test /api/sensors
-                dynamic sensors = GetSensors(filter);
-                Console.WriteLine(" Got " + sensors.Count + " Sensors");
-                foreach (var sensor in sensors)
+                // Fetch all sensors
+                Console.WriteLine("Testing '/api/sensors'");
+                dynamic sensors = await sensorMethods.GetSensors("{}");
+                Console.WriteLine("Got " + sensors.Count + " Sensors");
+                foreach (var sensor in sensors) {
                     Console.WriteLine("--> " + sensor.sensorId + ": " + sensor.parkingSpace + ", " + sensor.status + ", " + sensor.parkingLot);
+                }
                 Console.WriteLine();
 
-                /// Test /api/gateways
-                dynamic gateways = GetGateways();
-                Console.WriteLine(" Got " + gateways.Count + " Gateways: ");
-                foreach (var gateway in gateways)
+
+                // Fetch all gateways
+                Console.WriteLine("Testing '/api/gateways'");
+                dynamic gateways = await gatewayMethods.GetGateways();
+                Console.WriteLine("Got " + gateways.Count + " Gateways: ");
+                foreach (var gateway in gateways) {
                     Console.WriteLine("--> " + gateway.gatewayMac + ": " + gateway.name + " ");
+                }
                 Console.WriteLine();
 
-                /// Test /api/parking-lot/insert
-                var json = "{" +
-                    " 'parkingLotName': 'TEST: C#-api-lot-insert', " +
-                    " 'description': 'c# client test', " +
-                    " 'streetAddress': '123 here', " +
-                    " 'latitude': '33.810280507079874', " +
-                    " 'longitude': '-117.9189795255661' " +
-                "}";
-                InsertParkingLot(json);
-                lots = GetParkingLots();
+
+                // Insert a new parking lot
+                Console.WriteLine("Testing '/api/parking-lot/insert'");
+                JObject json = new JObject(
+                    new JProperty("parkingLotName", "TEST: C#-api-lot-insert"),
+                    new JProperty("description", "c# client test"),
+                    new JProperty("streetAddress", "123 here"),
+                    new JProperty("latitude", 33.810280507079874),
+                    new JProperty("longitude", -117.9189795255661)
+                );
+                await parkingLotMethods.InsertParkingLot(json.ToString());
+                Console.WriteLine("Parking Lot Insert Success");
+
+
+                // Get the parkingLotId of the inserted lot
+                lots = await parkingLotMethods.GetParkingLots();
                 string parkingLotId = null;
-                foreach (var lot in lots)
-                    if (lot.name == "TEST: C#-api-lot-insert")
+                foreach (var lot in lots) {
+                    if (lot.name == "TEST: C#-api-lot-insert") {
                         parkingLotId = lot.id;
+                    }
+                }
                 Console.WriteLine("ID of inserted parking lot: " + parkingLotId);
+                Console.WriteLine();
 
-                /// Test /api/parking-lot/update
-                json = "{" +
-                    " 'id': '" + parkingLotId + "', " +
-                    " 'parkingLotName': 'TEST: C#-api-lot-update' " +
-                "}";
-                UpdateParkingLot(json);
 
-                /// Test /api/sensor/insert
-                var sensorId = "abcd12340987fed0";
-                json = "{" +
-                    " 'sensorId': '" + sensorId + "', " +
-                    " 'parkingSpace': 'TEST: c#-api-sensor-insert', " +
-                    " 'parkingLotId': '" + parkingLotId + "', " +
-                    " 'network': 'PNI', " +
-                    " 'disabled': false," +
-                    " 'latitude': 33, " +
-                    " 'longitude': -111 " +
-                "}";
-                InsertSensor(json);
+                // Update that new parking lot
+                Console.WriteLine("Testing '/api/parking-lot/update'");
+                json = new JObject(
+                    new JProperty("id", parkingLotId),
+                    new JProperty("parkingLotName", "TEST: C#-api-lot-update")
+                );
+                await parkingLotMethods.UpdateParkingLot(json.ToString());
+                Console.WriteLine("Parking Lot Update Success");
+                Console.WriteLine();
 
-                /// Test /api/sensor/update
-                json = "{" +
-                    " 'sensorId': '" + sensorId + "', " +
-                    " 'parkingSpace': 'TEST: c#-api-sensor-update', " +
-                    " 'latitude': 33.810280507079874, " +
-                    " 'longitude': -117.9189795255661 " +
-                "}";
-                UpdateSensor(json);
 
-                /// Test /api/gateway/insert
-                json = "{" +
-                    " 'gatewayMac': 'cdef78904321dcb0', " +
-                    " 'gatewayName': 'TEST: C#-api-gateway-insert', " +
-                    " 'parkingLotId': '" + parkingLotId + "'" +
-                "}";
-                InsertGateway(json);
-                gateways = GetGateways();
+                // Insert a new sensor
+                Console.WriteLine("Testing '/api/sensor/insert'");
+                string sensorId = "abcd12340987fed0";
+                json = new JObject(
+                    new JProperty("sensorId", sensorId),
+                    new JProperty("parkingSpace", "TEST: c#-api-sensor-insert"),
+                    new JProperty("parkingLotId", parkingLotId),
+                    new JProperty("network", "PNI"),
+                    new JProperty("disabled", false),
+                    new JProperty("latitude", 33),
+                    new JProperty("longitude", -111)
+                );
+                await sensorMethods.InsertSensor(json.ToString());
+                Console.WriteLine("Sensor Insert Success");
+                Console.WriteLine();
+
+
+                // Update that new sensor
+                Console.WriteLine("Testing '/api/sensor/update'");
+                json = new JObject(
+                    new JProperty("sensorId", sensorId),
+                    new JProperty("parkingSpace", "TEST: c#-api-sensor-update"),
+                    new JProperty("latitude", 33.810280507079874),
+                    new JProperty("longitude", -117.9189795255661)
+                );
+                await sensorMethods.UpdateSensor(json.ToString());
+                Console.WriteLine("Sensor Update Success");
+                Console.WriteLine();
+
+
+                // Insert a new gateway
+                Console.WriteLine("Testing '/api/gateway/insert'");
+                json = new JObject(
+                    new JProperty("gatewayMac", "cdef78904321dcb0"),
+                    new JProperty("gatewayName", "TEST: C#-api-gateway-insert"),
+                    new JProperty("parkingLotId", parkingLotId)
+                );
+                await gatewayMethods.InsertGateway(json.ToString());
+                Console.WriteLine("Gateway Insert Success");
+
+
+                // Get the gateway Id of the inserted gateway
+                gateways = await gatewayMethods.GetGateways();
                 string gatewayId = null;
-                foreach (var gateway in gateways)
-                    if (gateway.name == "TEST: C#-api-gateway-insert")
+                foreach (var gateway in gateways) {
+                    if (gateway.name == "TEST: C#-api-gateway-insert") {
                         gatewayId = gateway.id;
+                    }
+                }
                 Console.WriteLine("ID of inserted gateway: " + gatewayId);
+                Console.WriteLine();
 
-                /// Test /api/gateway/update
-                json = "{" +
-                  " 'id': '" + gatewayId + "', " +
-                  " 'gatewayName': 'TEST: C#-api-gateway-update', " +
-                "}";
-                UpdateGateway(json);
 
-                /// Test /api/gateway/remove
-                json = "{" +
-                  " 'id': '" + gatewayId + "' " +
-                "}";
-                RemoveGateway(json);
+                // Update that new gateway
+                Console.WriteLine("Testing '/api/gateway/update'");
+                json = new JObject(
+                    new JProperty("id", gatewayId),
+                    new JProperty("gatewayName", "TEST: C#-api-gateway-update")
+                );
+                await gatewayMethods.UpdateGateway(json.ToString());
+                Console.WriteLine("Gateway Update Success");
+                Console.WriteLine();
 
-                /// Test /api/sensor/remove
-                json = "{" +
-                  " 'sensorId': '" + sensorId + "' " +
-                "}";
-                RemoveSensor(json);
 
-                /// Test /api/parking-lot/remove
-                json = "{" +
-                  " 'id': '" + parkingLotId + "' " +
-                "}";
-                RemoveParkingLot(json);
-            } catch { Console.WriteLine("First sample application crashed..."); }
+                // Remove that updated gateway
+                Console.WriteLine("Testing '/api/gateway/remove'");
+                json = new JObject(
+                    new JProperty("id", gatewayId)
+                );
+                await gatewayMethods.RemoveGateway(json.ToString());
+                Console.WriteLine("Gateway Remove Success");
+                Console.WriteLine();
+
+
+                // Remove that updated sensor
+                Console.WriteLine("Testing '/api/sensor/remove'");
+                json = new JObject(
+                    new JProperty("sensorId", sensorId)
+                );
+                await sensorMethods.RemoveSensor(json.ToString());
+                Console.WriteLine("Sensor Remove Success");
+                Console.WriteLine();
+
+
+                // Remove that updated parking lot
+                Console.WriteLine("Testing '/api/parking-lot/remove'");
+                json = new JObject(
+                    new JProperty("id", parkingLotId)
+                );
+                await parkingLotMethods.RemoveParkingLot(json.ToString());
+                Console.WriteLine("Parking Lot Remove Success");
+                Console.WriteLine();
+
+            } catch (Exception ex) {
+                Console.WriteLine("First sample application crashed. Error: " + ex.Message);
+            }
 
             // End of program
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
+
 
         /// <summary>
         /// This function tests non-CRUD sensor API functions and how to
@@ -231,7 +313,7 @@ namespace PlacePodApiExample
         /// is suggested to not make rapid calls to the sensor and wait around a minute before 
         /// sending another call to the same sensor.
         /// </summary>
-        /// <param name="sensorId">ID of the sensorthat the operations will be performed on</param>
+        /// <param name="sensorId">ID of the sensor that the operations will be performed on</param>
         static void SecondApp(string sensorId)
         {
             Console.WriteLine("Running operations using sensor: " + sensorId);
@@ -379,6 +461,9 @@ namespace PlacePodApiExample
         }
 
 
+
+
+
         //          HTTP Methods
 
 
@@ -387,23 +472,19 @@ namespace PlacePodApiExample
         /// </summary>
         /// <param name="path">Route for the API method</param>
         /// <returns>Result of the request</returns>
-        static string Get(string path)
-        {
+        static string Get(string path) {
             WebRequest req = WebRequest.Create(API_SERVER + path);
             UTF8Encoding enc = new UTF8Encoding();
 
             req.Method = "GET";
             req.Headers.Add(string.Format("X-API-KEY: {0}", API_KEY));
 
-            try
-            {   //Get the response
+            try {   //Get the response
                 WebResponse res = req.GetResponseAsync().Result;
                 Stream receiveStream = res.GetResponseStream();
                 StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
                 return reader.ReadToEnd();
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Console.WriteLine("Error: " + ex.InnerException);
                 throw;
             }
@@ -415,8 +496,7 @@ namespace PlacePodApiExample
         /// </summary>
         /// <param name="path">Route for the API method</param>
         /// <returns>Result of the request</returns>
-        static string Post(string path, string data)
-        {
+        static string Post(string path, string data) {
             WebRequest req = WebRequest.Create(API_SERVER + path);
             UTF8Encoding enc = new UTF8Encoding();
 
@@ -427,15 +507,12 @@ namespace PlacePodApiExample
             var dataStream = req.GetRequestStreamAsync().Result; // You can call .Result on a Task to wait for the result. or if it returns null use wait()
             dataStream.Write(enc.GetBytes(data), 0, data.Length);
 
-            try
-            {   //Get the response
+            try {   //Get the response
                 WebResponse res = req.GetResponseAsync().Result;
                 Stream receiveStream = res.GetResponseStream();
                 StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
                 return reader.ReadToEnd();
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Console.WriteLine("Error: " + ex.InnerException);
                 throw;
             }
@@ -447,8 +524,7 @@ namespace PlacePodApiExample
         /// </summary>
         /// <param name="path">Route for the API method</param>
         /// <returns>Result of the request</returns>
-        static string Put(string path, string data)
-        {
+        static string Put(string path, string data) {
             WebRequest req = WebRequest.Create(API_SERVER + path);
             UTF8Encoding enc = new UTF8Encoding();
 
@@ -459,15 +535,12 @@ namespace PlacePodApiExample
             var dataStream = req.GetRequestStreamAsync().Result; // You can call .Result on a Task to wait for the result. or if it returns null use wait()
             dataStream.Write(enc.GetBytes(data), 0, data.Length);
 
-            try
-            {   //Get the response
+            try {   //Get the response
                 WebResponse res = req.GetResponseAsync().Result;
                 Stream receiveStream = res.GetResponseStream();
                 StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
                 return reader.ReadToEnd();
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Console.WriteLine("Error: " + ex.InnerException);
                 throw;
             }
@@ -479,8 +552,7 @@ namespace PlacePodApiExample
         /// </summary>
         /// <param name="path">Route for the API method</param>
         /// <returns>Result of the request</returns>
-        static string Delete(string path, string data)
-        {
+        static string Delete(string path, string data) {
             WebRequest req = WebRequest.Create(API_SERVER + path);
             UTF8Encoding enc = new UTF8Encoding();
 
@@ -491,239 +563,18 @@ namespace PlacePodApiExample
             var dataStream = req.GetRequestStreamAsync().Result; // You can call .Result on a Task to wait for the result. or if it returns null use wait()
             dataStream.Write(enc.GetBytes(data), 0, data.Length);
 
-            try
-            {   //Get the response
+            try {   //Get the response
                 WebResponse res = req.GetResponseAsync().Result;
                 Stream receiveStream = res.GetResponseStream();
                 StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
                 return reader.ReadToEnd();
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 Console.WriteLine("Error: " + ex.InnerException);
                 throw;
             }
         }
 
 
-        //          API Operations
-
-
-        /// <summary>
-        /// Get Gateways.
-        /// Route: '/api/gateways'
-        /// </summary>
-        /// <returns>Array of gateways</returns>
-        static dynamic GetGateways()
-        {
-            Console.WriteLine("Fetching Gateways");
-            try
-            {
-                dynamic result = Get("/api/gateways");
-                return JsonConvert.DeserializeObject(result);
-            }
-            catch
-            {
-                Console.WriteLine("Couldn't get Gateways");
-                throw;
-            }
-        }
-
-
-        /// <summary>
-        /// Insert a new gateway.
-        /// Route: '/api/gateway/insert'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void InsertGateway(string json)
-        {
-            try { dynamic result = Post("/api/gateway/insert", json); }
-            catch
-            {
-                Console.WriteLine("Couldn't Insert Gateway");
-                throw;
-            }
-            Console.WriteLine("Gateway Insert Success");
-        }
-
-
-        /// <summary>
-        /// Update an existing gateway.
-        /// Route: '/api/gateway/update'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void UpdateGateway(string json)
-        {
-            try { dynamic result = Put("/api/gateway/update", json); }
-            catch
-            {
-                Console.WriteLine("Couldn't Update Gateway");
-                throw;
-            }
-            Console.WriteLine("Gateway Update Success");
-        }
-
-
-        /// <summary>
-        /// Delete an existing gateway.
-        /// Route: '/api/gateway/remove'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void RemoveGateway(string json)
-        {
-            try { dynamic result = Delete("/api/gateway/remove", json); }
-            catch
-            {
-                Console.WriteLine("Couldn't Remove Gateway");
-                throw;
-            }
-            Console.WriteLine("Gateway Remove Success");
-        }
-
-
-        /// <summary>
-        /// Get Parking Lots.
-        /// Route: '/api/parking-lots'
-        /// </summary>
-        /// <returns>Array of parking lots</returns>
-        static dynamic GetParkingLots()
-        {
-            Console.WriteLine("Fetching Parking Lots...");
-            try
-            {
-                var result = Get("/api/parking-lots");
-                return JsonConvert.DeserializeObject(result);
-            }
-            catch
-            {
-                Console.WriteLine("Couldn't get Parking Lots");
-                throw;
-            }
-        }
-
-
-        /// <summary>
-        /// Insert a new parking lot.
-        /// Route: '/api/parking-lot/insert'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void InsertParkingLot(string json)
-        {
-            try { dynamic result = Post("/api/parking-lot/insert", json); }
-            catch
-            {
-                Console.WriteLine("Couldn't Insert Parking Lot");
-                throw;
-            }
-            Console.WriteLine("Parking Lot Insert Success");
-        }
-
-
-        /// <summary>
-        /// Updating an existing parking lot.
-        /// Route: '/api/parking-lot/update'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void UpdateParkingLot(string json)
-        {
-            try { dynamic result = Put("/api/parking-lot/update", json); }
-            catch
-            {
-                Console.WriteLine("Couldn't Update Parking Lot");
-                throw;
-            }
-            Console.WriteLine("Parking Lot Update Success");
-        }
-
-
-        /// <summary>
-        /// Delete an existing parking lot.
-        /// Route: '/api/parking-lot-remove'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void RemoveParkingLot(string json)
-        {
-            try { dynamic result = Delete("/api/parking-lot/remove", json); }
-            catch
-            {
-                Console.WriteLine("Couldn't Remove Parking Lot");
-                throw;
-            }
-            Console.WriteLine("Parking Lot Remove Success");
-        }
-
-
-        /// <summary>
-        /// Get Sensors.
-        /// Route: '/api/sensors'
-        /// </summary>
-        /// <param name="filter">Optional</param>
-        /// <returns>Array of sensors</returns>
-        static dynamic GetSensors(string filter)
-        {
-            Console.WriteLine("Fetching Sensors");
-            try
-            {
-                dynamic result = Post("/api/sensors", filter); // all sensors 
-                return JsonConvert.DeserializeObject(result);
-            }
-            catch
-            {
-                Console.WriteLine("Couldn't get Sensors");
-                throw;
-            }
-        }
-
-
-        /// <summary>
-        /// Insert a new sensor.
-        /// Route: '/api/sensor/insert'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void InsertSensor(string json)
-        {
-            try { dynamic result = Post("/api/sensor/insert", json); }
-            catch
-            {
-                Console.WriteLine("Couldn't Insert Sensor");
-                throw;
-            }
-            Console.WriteLine("Sensor Insert Success");
-        }
-
-
-        /// <summary>
-        /// Update an existing sensor.
-        /// Route: '/api/sensor/update'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void UpdateSensor(string json)
-        {
-            try { dynamic result = Put("/api/sensor/update", json); }
-            catch
-            {
-                Console.WriteLine("Couldn't Update Sensor");
-                throw;
-            }
-            Console.WriteLine("Sensor Update Success");
-        }
-
-
-        /// <summary>
-        /// Delete an existing sensor.
-        /// Route: '/api/sensor/remove'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void RemoveSensor(string json)
-        {
-            try { dynamic result = Delete("/api/sensor/remove", json); }
-            catch
-            {
-                Console.WriteLine("Couldn't Remove Sensor");
-                throw;
-            }
-            Console.WriteLine("Sensor Remove Success");
-        }
 
 
         /// <summary>
