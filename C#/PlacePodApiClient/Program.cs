@@ -35,8 +35,8 @@ namespace PlacePodApiExample {
         //   2) click on settings > REST API 
         //   3) Click GENERATE API KEY 
         //   4) Copy the API URL and the API key into the below values
-        private static readonly string API_SERVER = "https://api-dev.pnicloud.com";
-        private static readonly string API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJjb21wYW5pZXNBY2NvdW50c0lkIiwidW5pcXVlX25hbWUiOiJzUndUUkRNS2JlZTNZcWdyeiIsIm5iZiI6MTUxMjUwNDUzMSwiZXhwIjoxNjcwMjcwOTMxLCJpYXQiOjE1MTI1MDQ1MzEsImlzcyI6Imh0dHBzOi8vd3d3LnBuaWNvcnAuY29tIiwiYXVkIjoiaHR0cHM6Ly93d3cucG5pY29ycC5jb20ifQ.1EvN7VThWGBRY2NzSZsL6DhT4rFoI6wYSEpQskjCXD4";
+        private static readonly string API_SERVER = "";
+        private static readonly string API_KEY = "";
         private static Http HttpClient;
 
 
