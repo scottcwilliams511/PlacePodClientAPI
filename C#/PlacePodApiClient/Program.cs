@@ -1,31 +1,22 @@
-﻿using System.Net;
-using System.IO;
-using System.Text;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using PlacePodApiClient;
-using PlacePodApiClient.Gateways;
 using PlacePodApiClient.API_Methods;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
 
-/// <summary>
-/// 
-/// Implemented using Placepod API V1.1
-/// Last updated: February 21th, 2018
-/// 
-/// The placepod API is undocumented and subject to change
-/// Fully documented API comming soon!
-/// 
-/// Unlike the python application, the actual error message seems to get lost,
-/// so all we get here is a internal 500 error if something blows up like 
-/// a bad sensor ID. Errors can be confirmed by entering the same request
-/// that caused the error on the API's Swagger page.
-/// 
-/// </summary>
-/// <author>Byron Whitlock bwhitlock@pnicorp.com</author>
-/// <author>Scott Williams swilliams@pnicorp.com</author>
 namespace PlacePodApiExample {
+
+    /// <summary>
+    /// 
+    /// Implemented using Placepod API V1.1
+    /// Last updated: February 22nd, 2018
+    /// 
+    /// The placepod API is undocumented and subject to change
+    /// Fully documented API comming soon!
+    /// 
+    /// </summary>
+    /// <author>Byron Whitlock bwhitlock@pnicorp.com</author>
+    /// <author>Scott Williams swilliams@pnicorp.com</author>
     public class Program {
 
         // Rest API is documented at https://api.pnicloud.com
@@ -37,6 +28,8 @@ namespace PlacePodApiExample {
         //   4) Copy the API URL and the API key into the below values
         private static readonly string API_SERVER = "";
         private static readonly string API_KEY = "";
+
+
         private static Http HttpClient;
 
 
@@ -68,9 +61,6 @@ namespace PlacePodApiExample {
             }
 
             
-
-
-            // TODO finish this and all methods related to it....
             // Program 2
             Console.WriteLine("This second sample application will test the other 'sensor' operaions. " +
                 "A sensor ID must be provided to proceed.");
@@ -79,9 +69,10 @@ namespace PlacePodApiExample {
             if (input == "y" || input == "Y") {
                 Console.WriteLine("Enter sensor ID: ");
                 input = Console.ReadLine();
-                SecondApp(input);
+                Task.Run(async () => {
+                    await SecondApp(input);
+                }).GetAwaiter().GetResult();
             }
-
         }
 
 
@@ -168,8 +159,7 @@ namespace PlacePodApiExample {
                         parkingLotId = lot.id;
                     }
                 }
-                Console.WriteLine("ID of inserted parking lot: " + parkingLotId);
-                Console.WriteLine();
+                Console.WriteLine("ID of inserted parking lot: " + parkingLotId + "\n");
 
 
                 // Update that new parking lot
@@ -179,8 +169,7 @@ namespace PlacePodApiExample {
                     new JProperty("parkingLotName", "TEST: C#-api-lot-update")
                 );
                 await parkingLotMethods.UpdateParkingLot(json.ToString());
-                Console.WriteLine("Parking Lot Update Success");
-                Console.WriteLine();
+                Console.WriteLine("Parking Lot Update Success" + "\n");
 
 
                 // Insert a new sensor
@@ -196,8 +185,7 @@ namespace PlacePodApiExample {
                     new JProperty("longitude", -111)
                 );
                 await sensorMethods.InsertSensor(json.ToString());
-                Console.WriteLine("Sensor Insert Success");
-                Console.WriteLine();
+                Console.WriteLine("Sensor Insert Success" + "\n");
 
 
                 // Update that new sensor
@@ -209,8 +197,7 @@ namespace PlacePodApiExample {
                     new JProperty("longitude", -117.9189795255661)
                 );
                 await sensorMethods.UpdateSensor(json.ToString());
-                Console.WriteLine("Sensor Update Success");
-                Console.WriteLine();
+                Console.WriteLine("Sensor Update Success" + "\n");
 
 
                 // Insert a new gateway
@@ -232,8 +219,7 @@ namespace PlacePodApiExample {
                         gatewayId = gateway.id;
                     }
                 }
-                Console.WriteLine("ID of inserted gateway: " + gatewayId);
-                Console.WriteLine();
+                Console.WriteLine("ID of inserted gateway: " + gatewayId + "\n");
 
 
                 // Update that new gateway
@@ -243,8 +229,7 @@ namespace PlacePodApiExample {
                     new JProperty("gatewayName", "TEST: C#-api-gateway-update")
                 );
                 await gatewayMethods.UpdateGateway(json.ToString());
-                Console.WriteLine("Gateway Update Success");
-                Console.WriteLine();
+                Console.WriteLine("Gateway Update Success" + "\n");
 
 
                 // Remove that updated gateway
@@ -253,8 +238,7 @@ namespace PlacePodApiExample {
                     new JProperty("id", gatewayId)
                 );
                 await gatewayMethods.RemoveGateway(json.ToString());
-                Console.WriteLine("Gateway Remove Success");
-                Console.WriteLine();
+                Console.WriteLine("Gateway Remove Success" + "\n");
 
 
                 // Remove that updated sensor
@@ -263,8 +247,7 @@ namespace PlacePodApiExample {
                     new JProperty("sensorId", sensorId)
                 );
                 await sensorMethods.RemoveSensor(json.ToString());
-                Console.WriteLine("Sensor Remove Success");
-                Console.WriteLine();
+                Console.WriteLine("Sensor Remove Success" + "\n");
 
 
                 // Remove that updated parking lot
@@ -273,8 +256,7 @@ namespace PlacePodApiExample {
                     new JProperty("id", parkingLotId)
                 );
                 await parkingLotMethods.RemoveParkingLot(json.ToString());
-                Console.WriteLine("Parking Lot Remove Success");
-                Console.WriteLine();
+                Console.WriteLine("Parking Lot Remove Success" + "\n");
 
             } catch (Exception ex) {
                 Console.WriteLine("First sample application crashed. Error: " + ex.Message);
@@ -314,483 +296,248 @@ namespace PlacePodApiExample {
         /// sending another call to the same sensor.
         /// </summary>
         /// <param name="sensorId">ID of the sensor that the operations will be performed on</param>
-        static void SecondApp(string sensorId)
-        {
-            Console.WriteLine("Running operations using sensor: " + sensorId);
-            string json = null;
+        public async static Task SecondApp(string sensorId) {
+            SensorMethods sensorMethods = new SensorMethods(HttpClient);
 
-            /// Test /api/sensor/history
+            Console.WriteLine("Running operations using sensor: " + sensorId);
+            JObject json;
+
+
+            // Fetch sensor history within the timespan
+            Console.WriteLine("Test /api/sensor/history");
             Console.WriteLine("Get Sensor History (y/n)? ");
             var input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                json = "{" +
-                    " 'sensorId': '" + sensorId + "', " +
-                    " 'startTime': '2017-09-08T01:00:00.000Z', " + // startTime and endTime are in ISO form.
-                    " 'endTime': '2017-09-08T01:10:00.000Z' " +    // Modify these as needed to when your sensor
-                "}";                                               // has been online.
-                try
-                {
-                    var history = SensorHistory(json);
-                    Console.WriteLine("Number of results: " + history.Count);
-                } catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                // startTime and endTime are in ISO form. Modify these as needed to when your sensor has been online.
+                json = new JObject(
+                    new JProperty("sensorId", sensorId),
+                    new JProperty("startTime", "2017-12-08T01:00:00.000Z"),
+                    new JProperty("endTime", "2017-12-08T01:10:00.000Z")
+                );
+                try {
+                    var history = await sensorMethods.SensorHistory(json.ToString());
+                    Console.WriteLine("Number of results: " + history.Count + "\n");
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
 
-            json = "{" +
-                " 'sensorId': '" + sensorId + "', " +
-            "}";
+            json = new JObject(
+                new JProperty("sensorId", sensorId)
+            );
 
-            /// Test /api/sensor/recalibrate
+
+            // Send down a recalibrate request
+            Console.WriteLine("Test /api/sensor/recalibrate");
             Console.WriteLine("Recalibrate sensor (y/n)? ");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                try { Recalibrate(json); }
-                catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                try {
+                    Console.WriteLine("Sending Recalibrate request...");
+
+                    await sensorMethods.Recalibrate(json.ToString());
+
+                    Console.WriteLine("Recalibrate Sent" + "\n");
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
-                
-            /// Test /api/initialize-bist and /api/sensor/bist-response/{SensorId}/{LastUpdated}
+
+
+            // Run a full BIST test that waits up to 5 minutes for the results
+            Console.WriteLine("Test /api/initialize-bist and /api/sensor/bist-response/{SensorId}/{LastUpdated}");
             Console.WriteLine("Run basic internal self test (BIST) (y/n)?");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                try { Bist(json, sensorId); }
-                catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                try {
+                    Console.WriteLine("Sending BIST request...");
+
+                    dynamic result = await sensorMethods.Bist(json.ToString(), sensorId);
+                    foreach (var i in result) {
+                        Console.WriteLine("--> " + i.sensorType + ": " + i.status);
+                    }
+                    Console.WriteLine();
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
 
-            /// Test /api/sensor/ping and /api/sensor/ping-response/{SensorId}/{LastUpdated}
+
+            // Send down a Ping request and wait up to 5 minutes for the response
+            Console.WriteLine("Test /api/sensor/ping and /api/sensor/ping-response/{SensorId}/{LastUpdated}");
             Console.WriteLine("Ping sensor (y/n)?");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                try { Ping(json, sensorId); }
-                catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                try {
+                    Console.WriteLine("Sending Ping request...");
+
+                    dynamic result = await sensorMethods.Ping(json.ToString(), sensorId);
+                    foreach (var i in result) {
+                        Console.WriteLine("--> Ping RSSI: " + i.pingRssi + ", Ping SNR: " + i.pingSNR + ". Server time: " + i.serverTime);
+                    }
+                    Console.WriteLine();
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
 
-            /// Test /api/sensor/force-vacant
+            
+            // Force the sensor's Car Presence to say vacant
+            Console.WriteLine("Test /api/sensor/force-vacant");
             Console.WriteLine("Force car presence to vacant (y/n)?");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                try { ForceVacant(json); }
-                catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                try {
+                    Console.WriteLine("Sending Force Vacant...");
+
+                    await sensorMethods.ForceVacant(json.ToString());
+
+                    Console.WriteLine("Force Vacant Sent" + "\n");
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
 
-            /// Test /api/sensor/force-occupied
+
+            // Force the sensor's Car Presence to say occcupied
+            Console.WriteLine("Test /api/sensor/force-occupied");
             Console.WriteLine("Force car presence to occupied (y/n)?");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                try { ForceOccupied(json); }
-                catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                try {
+                    Console.WriteLine("Sending Force Occupied...");
+
+                    await sensorMethods.ForceOccupied(json.ToString());
+
+                    Console.WriteLine("Force Occupied Sent" + "\n");
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
 
-            /// Test /api/sensor/enable-transition-state-reporting
+
+            // Enables transition state reporting for the sensor
+            Console.WriteLine("Test /api/sensor/enable-transition-state-reporting");
             Console.WriteLine("Enable transition state reporting (y/n)?");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                try { EnableTransitionStateReporting(json); }
-                catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                try {
+                    Console.WriteLine("Sending enable transition state reporting...");
+
+                    await sensorMethods.EnableTransitionStateReporting(json.ToString());
+
+                    Console.WriteLine("Enable transition state reporting Sent" + "\n");
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
 
-            /// Test /api/sensor/disable-transition-state-reporting
+
+            // Disables transition state reporting for the sensor
+            Console.WriteLine("Test /api/sensor/disable-transition-state-reporting");
             Console.WriteLine("Disable transition state reporting (y/n)?");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                try { DisableTransitionStateReporting(json); }
-                catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                try {
+                    Console.WriteLine("Sending disable transition state reporting...");
+
+                    await sensorMethods.DisableTransitionStateReporting(json.ToString());
+
+                    Console.WriteLine("Disable transition state reporting Sent" + "\n");
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
 
-            /// Test /api/sensor/set-lora-wakeup-interval
-            json = "{" +
-                " 'sensorId': '" + sensorId + "', " +
-                " 'payload': 5" +  // Payload is in minutes (int)
-            "}";
-            Console.WriteLine("Set loRa wakeup interval to 5 minutes (y/n)?");
+
+            // Sensor will report every 5 minutes
+            Console.WriteLine("Test /api/sensor/set-lora-wakeup-interval");
+            Console.WriteLine("Set LoRa wakeup interval to 5 minutes (y/n)?");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                try { SetLoraWakeupInterval(json); }
-                catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                try {
+                    // Payload is in minutes (int)
+                    json = new JObject(
+                        new JProperty("sensorId", sensorId),
+                        new JProperty("payload", 5)   
+                    );
+                    Console.WriteLine("Sending set LoRa wakeup interval...");
+
+                    await sensorMethods.SetLoraWakeupInterval(json.ToString());
+
+                    Console.WriteLine("Set LoRa wakeup interval Sent" + "\n");
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
 
-            /// Test /api/sensor/set-lora-tx-power
-            json = "{" +
-                " 'sensorId': '" + sensorId + "', " +
-                " 'payload': 11" +  // Payload is an int (1-30)
-            "}";
-            Console.WriteLine("Set loRa Tx Power to 11 (y/n)?");
+
+            // Change the sensor's LoRa Tx Power to 11
+            Console.WriteLine("Test /api/sensor/set-lora-tx-power");
+            Console.WriteLine("Set LoRa Tx Power to 11 (y/n)?");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                try { SetLoraTxPower(json); }
-                catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                try {
+                    // Payload is an int (1-30)
+                    json = new JObject(
+                        new JProperty("sensorId", sensorId),
+                        new JProperty("payload", 11)
+                    );
+                    Console.WriteLine("Sending set LoRa Tx Power...");
+
+                    await sensorMethods.SetLoraTxPower(json.ToString());
+
+                    Console.WriteLine("Set LoRa Tx Power sent" + "\n");
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
 
-            /// Test /api/sensor/set-tx-spreading-factor
-            json = "{" +
-                " 'sensorId': '" + sensorId + "', " +
-                " 'payload': 6" +  // Payload is an int (see API documentation)
-            "}";
+            // Change the sensor's spread factor to 7
+            Console.WriteLine("Test /api/sensor/set-tx-spreading-factor");
             Console.WriteLine("Set Tx Spread Factor to SF 7, BW 125 kHz (y/n)?");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                try { SetTxSpreadingFactor(json); }
-                catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                try {
+                    // Payload is an int (see API documentation)
+                    json = new JObject(
+                        new JProperty("sensorId", sensorId),
+                        new JProperty("payload", 6)
+                    );
+                    Console.WriteLine("Sending set Tx spreading factor...");
+
+                    await sensorMethods.SetTxSpreadingFactor(json.ToString());
+
+                    Console.WriteLine("Set Tx spreading factor sent" + "\n");
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
 
             /// Test /api/sensor/set-frequency-sub-band
-            json = "{" +
-                " 'sensorId': '" + sensorId + "', " +
-                " 'payload': 1" +  // Payload is an int (see API documentation)
-            "}";
+
             Console.WriteLine("Set Frequency sub band to 902.3 kHz - 903.7 kHz - 125k");
             input = Console.ReadLine();
-            if (input == "y" || input == "Y")
-            {
-                try { SetFrequencySubBand(json); }
-                catch { /* Eat exception */ }
+            if (input == "y" || input == "Y") {
+                try {
+                    // Payload is an int (see API documentation)
+                    json = new JObject(
+                        new JProperty("sensorId", sensorId),
+                        new JProperty("payload", 1)
+                    );
+                    Console.WriteLine("Sending set requency Sub Band...");
+
+                    await sensorMethods.SetFrequencySubBand(json.ToString());
+
+                    Console.WriteLine("Set frequency sub band sent" + "\n");
+                } catch (Exception ex) {
+                    Console.WriteLine("Method Error: " + ex.Message + "\n");
+                }
             }
 
             // End of program
             Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
-        }
-
-
-
-
-
-        //          HTTP Methods
-
-
-        /// <summary>
-        /// Method for making a HTTP 'Get' request to the API
-        /// </summary>
-        /// <param name="path">Route for the API method</param>
-        /// <returns>Result of the request</returns>
-        static string Get(string path) {
-            WebRequest req = WebRequest.Create(API_SERVER + path);
-            UTF8Encoding enc = new UTF8Encoding();
-
-            req.Method = "GET";
-            req.Headers.Add(string.Format("X-API-KEY: {0}", API_KEY));
-
-            try {   //Get the response
-                WebResponse res = req.GetResponseAsync().Result;
-                Stream receiveStream = res.GetResponseStream();
-                StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
-                return reader.ReadToEnd();
-            } catch (Exception ex) {
-                Console.WriteLine("Error: " + ex.InnerException);
-                throw;
-            }
-        }
-
-
-        /// <summary>
-        /// Method for making a HTTP 'Post' request to the API
-        /// </summary>
-        /// <param name="path">Route for the API method</param>
-        /// <returns>Result of the request</returns>
-        static string Post(string path, string data) {
-            WebRequest req = WebRequest.Create(API_SERVER + path);
-            UTF8Encoding enc = new UTF8Encoding();
-
-            req.Method = "POST";
-            req.ContentType = "application/json";
-            req.Headers.Add(string.Format("X-API-KEY: {0}", API_KEY));
-
-            var dataStream = req.GetRequestStreamAsync().Result; // You can call .Result on a Task to wait for the result. or if it returns null use wait()
-            dataStream.Write(enc.GetBytes(data), 0, data.Length);
-
-            try {   //Get the response
-                WebResponse res = req.GetResponseAsync().Result;
-                Stream receiveStream = res.GetResponseStream();
-                StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
-                return reader.ReadToEnd();
-            } catch (Exception ex) {
-                Console.WriteLine("Error: " + ex.InnerException);
-                throw;
-            }
-        }
-
-
-        /// <summary>
-        /// Method for making a HTTP 'Put' request to the API
-        /// </summary>
-        /// <param name="path">Route for the API method</param>
-        /// <returns>Result of the request</returns>
-        static string Put(string path, string data) {
-            WebRequest req = WebRequest.Create(API_SERVER + path);
-            UTF8Encoding enc = new UTF8Encoding();
-
-            req.Method = "Put";
-            req.ContentType = "application/json";
-            req.Headers.Add(string.Format("X-API-KEY: {0}", API_KEY));
-
-            var dataStream = req.GetRequestStreamAsync().Result; // You can call .Result on a Task to wait for the result. or if it returns null use wait()
-            dataStream.Write(enc.GetBytes(data), 0, data.Length);
-
-            try {   //Get the response
-                WebResponse res = req.GetResponseAsync().Result;
-                Stream receiveStream = res.GetResponseStream();
-                StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
-                return reader.ReadToEnd();
-            } catch (Exception ex) {
-                Console.WriteLine("Error: " + ex.InnerException);
-                throw;
-            }
-        }
-
-
-        /// <summary>
-        /// Method for making a HTTP 'Delete' request to the API
-        /// </summary>
-        /// <param name="path">Route for the API method</param>
-        /// <returns>Result of the request</returns>
-        static string Delete(string path, string data) {
-            WebRequest req = WebRequest.Create(API_SERVER + path);
-            UTF8Encoding enc = new UTF8Encoding();
-
-            req.Method = "Delete";
-            req.ContentType = "application/json";
-            req.Headers.Add(string.Format("X-API-KEY: {0}", API_KEY));
-
-            var dataStream = req.GetRequestStreamAsync().Result; // You can call .Result on a Task to wait for the result. or if it returns null use wait()
-            dataStream.Write(enc.GetBytes(data), 0, data.Length);
-
-            try {   //Get the response
-                WebResponse res = req.GetResponseAsync().Result;
-                Stream receiveStream = res.GetResponseStream();
-                StreamReader reader = new StreamReader(receiveStream, Encoding.UTF8);
-                return reader.ReadToEnd();
-            } catch (Exception ex) {
-                Console.WriteLine("Error: " + ex.InnerException);
-                throw;
-            }
-        }
-
-
-
-
-        /// <summary>
-        /// Get sensor history.
-        /// Route: '/api/sensor/history'
-        /// </summary>
-        /// <param name="filter">JSON string with start/end date and optional fields</param>
-        /// <returns>An array of sensor time objects</returns>
-        static dynamic SensorHistory(string filter)
-        {
-            Console.WriteLine("Fetching Sensor History");
-            dynamic result = Post("/api/sensor/history", filter);
-            return JsonConvert.DeserializeObject(result);
-        }
-
-
-        /// <summary>
-        /// Send a recalibrate to a sensor
-        /// Route: '/api/sensor/recalibrate'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void Recalibrate(string json)
-        {
-            Console.WriteLine("Sending Recalibrate...");
-            dynamic result = Post("/api/sensor/recalibrate", json);
-            Console.WriteLine("Recalibrate Sent");
-        }
-
-        /// <summary>
-        /// First sends a BIST initialization request to the sensor, then checks
-        /// for the sensor response every second over the course of 5 minutes.
-        /// Routes: '/api/sensor/initialize-bist' and '/api/sensor/bist-response/{SensorId}/{LastUpdated}'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        /// <param name="sensorId">sensorId, but not in JSON form.</param>
-        static void Bist(string json, string sensorId)
-        {
-            Console.WriteLine("Sending BIST...");
-            var now = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss");
-
-            // Make the post call
-            dynamic result = Post("/api/sensor/initialize-bist", json);
-            Console.WriteLine("BIST Sent", now);
-
-            // We want to call the bist-response every second for 5 minutes
-            // or until a response comes back.
-            var timer = 0;
-            while (timer < 300)
-            {
-                result = Get("/api/sensor/bist-response/" + sensorId + "/" + now);
-                if (result != "[]")
-                    break;
-
-                Console.WriteLine("Waiting for Bist response " + (++timer));
-                System.Threading.Thread.Sleep(1000);
-                now = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss");
-            }
-
-            if (timer >= 300)
-            {
-                Console.WriteLine("No response...");
-                return;
-            }
-
-            Console.WriteLine("BIST response recieved!");
-            var jsonObj =  JsonConvert.DeserializeObject(result);
-            foreach (var i in jsonObj)
-                Console.WriteLine("--> " + i.sensorType + ": " + i.status);
-        }
-
-        /// <summary>
-        /// First sends a Ping initialization request to the sensor, then checks
-        /// for the sensor response every second over the course of 5 minutes.
-        /// Routes: '/api/sensor/ping' and '/api/sensor/ping-response/{SensorId}/{LastUpdated}'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        /// <param name="sensorId">sensorId, but not in JSON form.</param>
-        static void Ping(string json, string sensorId)
-        {
-            Console.WriteLine("Sending Ping...");
-            var now = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss");
-
-            // Make the post call
-            dynamic result = Post("/api/sensor/ping", json);
-            Console.WriteLine("Ping Sent", now, result);
-
-            // We want to call the ping-response every second for 5 minutes
-            // or until a response comes back.
-            var timer = 0;
-            while (timer < 300)
-            {
-                result = Get("/api/sensor/ping-response/" + sensorId + "/" + now);
-                if (result != "[]")
-                    break;
-
-                Console.WriteLine("Waiting for Ping response " + (++timer));
-                System.Threading.Thread.Sleep(1000);
-                now = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss");
-            }
-
-            if (timer >= 300)
-            {
-                Console.WriteLine("No response...");
-                return;
-            }
-
-            Console.WriteLine("Ping response recieved!");
-            var jsonObj = JsonConvert.DeserializeObject(result);
-            foreach (var i in jsonObj)
-                Console.WriteLine("--> Ping RSSI: " + i.pingRssi + ", Ping SNR: " + i.pingSNR + ". Server time: " + i.serverTime);
-        }
-
-
-        /// <summary>
-        /// Forces sensor's car presence state to vacant.
-        /// Route: '/api/sensor/force-vacant'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void ForceVacant(string json)
-        {
-            Console.WriteLine("Sending Force Vacant...");
-            dynamic result = Post("/api/sensor/force-vacant", json);
-            Console.WriteLine("Force Vacant Sent");
-        }
-
-
-        /// <summary>
-        /// Forces sensor's car presence state to occupied.
-        /// Route: '/api/sensor/force-occupied'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void ForceOccupied(string json)
-        {
-            Console.WriteLine("Sending Force Occupied...");
-            dynamic result = Post("/api/sensor/force-occupied", json);
-            Console.WriteLine("Force Occupied Sent");
-        }
-
-
-        /// <summary>
-        /// Turns on state reporting for car entering/leaving.
-        /// Route: '/api/sensor/enable-transition-state-reporting'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void EnableTransitionStateReporting(string json)
-        {
-            Console.WriteLine("Sending enable transition state reporting...");
-            dynamic result = Post("/api/sensor/enable-transition-state-reporting", json);
-            Console.WriteLine("Enable transition state reporting Sent");
-        }
-
-
-        /// <summary>
-        /// Turns off state reporting for a car entering/leaving.
-        /// Route: '/api/sensor/disable-transition-state-reporting'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void DisableTransitionStateReporting(string json)
-        {
-            Console.WriteLine("Sending disable transition state reporting...");
-            dynamic result = Post("/api/sensor/disable-transition-state-reporting", json);
-            Console.WriteLine("Disable transition state reporting Sent");
-        }
-
-
-        /// <summary>
-        /// Sets the time period in minutes for how long the sensor will sleep before waking up.
-        /// Route: '/api/sensor/set-lora-wakeup-interval'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void SetLoraWakeupInterval(string json)
-        {
-            Console.WriteLine("Sending set loRa wakeup interval...");
-            dynamic result = Post("/api/sensor/set-lora-wakeup-interval", json);
-            Console.WriteLine("Set loRa wakeup interval Sent");
-        }
-
-
-        /// <summary>
-        /// Using an integer between 1 and 30, sets the loRa Tx power.
-        /// Route: '/api/sensor/set-lora-tx-power'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void SetLoraTxPower(string json)
-        {
-            Console.WriteLine("Sending set loRa Tx Power...");
-            dynamic result = Post("/api/sensor/set-lora-tx-power", json);
-            Console.WriteLine("Set loRa Tx Power sent");
-        }
-
-
-        /// <summary>
-        /// Using an integer based on the chart available on the API's Swagger page,
-        /// adjusts the sensor's Tx spreading factor.
-        /// Route: '/api/sensor/set-tx-spreading-factor'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void SetTxSpreadingFactor(string json)
-        {
-            Console.WriteLine("Sending set Tx spreading factor...");
-            dynamic result = Post("/api/sensor/set-tx-spreading-factor", json);
-            Console.WriteLine("Set Tx spreading factor sent");
-        }
-
-
-        /// <summary>
-        /// Using an integer based on the chart available on the API's Swagger page,
-        /// adjusts the sensor's frequency sub band.
-        /// Route: '/api/sensor/set-frequency-sub-band'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        static void SetFrequencySubBand(string json)
-        {
-            Console.WriteLine("Sending set requency Sub Band...");
-            dynamic result = Post("/api/sensor/set-frequency-sub-band", json);
-            Console.WriteLine("Set frequency sub band sent");
         }
     }
 }

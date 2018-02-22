@@ -1,9 +1,8 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
 
-namespace PlacePodApiClient.Gateways {
+namespace PlacePodApiClient.API_Methods {
 
     /// <summary>
     /// Contains all of the API methods related to a gateway
