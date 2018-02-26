@@ -1,12 +1,12 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PlacePodApiClient {
+/// <author>Scott Williams</author>
+namespace Http_Async {
     /// <summary>
     /// Class for making http requests. Inner logic is abstracted away so that 
     /// one only needs to initially pass in an API url and key. Then the appropriate
@@ -14,7 +14,7 @@ namespace PlacePodApiClient {
     /// 
     /// Supports HTTP GET, POST, PUT, and DELETE methods.
     /// </summary>
-    internal class Http {
+    internal class HttpAsync {
         public string API_SERVER { private get; set; }
         public string API_KEY { private get; set; }
 
@@ -22,7 +22,7 @@ namespace PlacePodApiClient {
         /// Default constructor. API_SERVER must be set later before making requests. API_KEY must be set
         /// for requests that require a header API key.
         /// </summary>
-        public Http() {
+        public HttpAsync() {
         }
 
 
@@ -32,7 +32,7 @@ namespace PlacePodApiClient {
         /// </summary>
         /// <param name="api_url"></param>
         /// <param name="api_key"></param>
-        public Http(string api_url, string api_key) {
+        public HttpAsync(string api_url, string api_key) {
             API_SERVER = api_url;
             API_KEY = api_key;
         }
@@ -43,7 +43,7 @@ namespace PlacePodApiClient {
         /// </summary>
         /// <param name="path">Route for the API method</param>
         /// <returns>Result of the request</returns>
-        public Task<JArray> Get(string path) {
+        public Task<string> Get(string path) {
             return AsyncHttpRequest(path, null, "GET");
         }
 
@@ -53,7 +53,7 @@ namespace PlacePodApiClient {
         /// </summary>
         /// <param name="path">Route for the API method</param>
         /// <returns>Result of the request</returns>
-        public async Task <JArray> Post(string path, string data) {
+        public async Task<string> Post(string path, string data) {
             return await AsyncHttpRequest(path, data, "POST");
         }
 
@@ -63,7 +63,7 @@ namespace PlacePodApiClient {
         /// </summary>
         /// <param name="path">Route for the API method</param>
         /// <returns>Result of the request</returns>
-        public async Task<JArray> Put(string path, string data) {
+        public async Task<string> Put(string path, string data) {
             return await AsyncHttpRequest(path, data, "PUT");
         }
 
@@ -73,7 +73,7 @@ namespace PlacePodApiClient {
         /// </summary>
         /// <param name="path">Route for the API method</param>
         /// <returns>Result of the request</returns>
-        public async Task<JArray> Delete(string path, string data) {
+        public async Task<string> Delete(string path, string data) {
             return await AsyncHttpRequest(path, data, "DELETE");
         }
 
@@ -85,7 +85,7 @@ namespace PlacePodApiClient {
         /// <param name="data">Optional JSON parameters to be sent</param>
         /// <param name="method">"GET", "POST", "PUT", or "DELETE"</param>
         /// <returns>dynamic JArray</returns>
-        private async Task<JArray> AsyncHttpRequest(string path, string data, string method) {
+        private async Task<string> AsyncHttpRequest(string path, string data, string method) {
             try {
                 HttpClient client = new HttpClient();
                 HttpRequestMessage request = new HttpRequestMessage() {
@@ -97,12 +97,12 @@ namespace PlacePodApiClient {
                 if (API_KEY != null) {
                     request.Headers.Add("X-API-KEY", API_KEY);
                 }
-                
+
                 // Only add data if the user passed some, ie POST call
                 if (data != null) {
                     request.Content = new StringContent(data, Encoding.UTF8, "application/json");
                 }
-                
+
                 HttpResponseMessage response = await client.SendAsync(request);
                 string responseMsg = await response.Content.ReadAsStringAsync();
 
@@ -128,10 +128,7 @@ namespace PlacePodApiClient {
                     }
                 }
 
-                // This step can vary based on the API called. Ex:
-                // dynamic json = JObject.Parse(responseMsg);
-                dynamic json = JsonConvert.DeserializeObject(responseMsg);
-                return json;
+                return responseMsg;
             } catch {
                 Console.WriteLine("Http " + method + " error");
                 throw;

@@ -1,17 +1,19 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Http_Async;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
 
-namespace PlacePodApiClient.API_Methods {
+namespace API_Methods {
 
     /// <summary>
     /// Contains all of the API methods related to a sensor
     /// </summary>
     internal class SensorMethods {
 
-        private Http http;
-        public SensorMethods(Http httpClient) {
-            http = httpClient;
+        private HttpAsync http;
+        public SensorMethods(string api_url, string api_key) {
+            http = new HttpAsync(api_url, api_key);
         }
 
 
@@ -24,7 +26,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> GetSensors(string filter) {
             try {
                 dynamic result = await http.Post("/api/sensors", filter);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't get Sensors");
                 throw;
@@ -40,7 +42,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> InsertSensor(string json) {
             try {
                 dynamic result = await http.Post("/api/sensor/insert", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't Insert Sensor");
                 throw;
@@ -56,7 +58,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> UpdateSensor(string json) {
             try {
                 dynamic result = await http.Put("/api/sensor/update", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't Update Sensor");
                 throw;
@@ -72,7 +74,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> RemoveSensor(string json) {
             try {
                 dynamic result = await http.Delete("/api/sensor/remove", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't Remove Sensor");
                 throw;
@@ -89,7 +91,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> SensorHistory(string filter) {
             try {
                 dynamic result = await http.Post("/api/sensor/history", filter);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't fetch sensor history");
                 throw;
@@ -105,7 +107,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> Recalibrate(string json) {
             try {
                 dynamic result = await http.Post("/api/sensor/recalibrate", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't send recalibrate request.");
                 throw;
@@ -138,7 +140,9 @@ namespace PlacePodApiClient.API_Methods {
             try {
                 int timer = 0;
                 while (timer < 300) {
-                    result = await http.Get("/api/sensor/bist-response/" + sensorId + "/" + now);
+
+                    dynamic rawResponse = await http.Get("/api/sensor/bist-response/" + sensorId + "/" + now);
+                    result = JsonConvert.DeserializeObject(rawResponse);
                     if (result.ToString() != "[]") {
                         break;
                     }
@@ -175,7 +179,7 @@ namespace PlacePodApiClient.API_Methods {
 
             // Send down the Ping request
             try {
-                result = await http.Post("/api/sensor/ping", json);
+                await http.Post("/api/sensor/ping", json);
                 Console.WriteLine("Ping Sent", now, result);
             } catch {
                 Console.WriteLine("Couldn't send down Ping request");
@@ -187,7 +191,8 @@ namespace PlacePodApiClient.API_Methods {
             try {
                 int timer = 0;
                 while (timer < 300) {
-                    result = await http.Get("/api/sensor/ping-response/" + sensorId + "/" + now);
+                    dynamic rawResponse = await http.Get("/api/sensor/ping-response/" + sensorId + "/" + now);
+                    result = JsonConvert.DeserializeObject(rawResponse);
                     if (result.ToString() != "[]") {
                         break;
                     }
@@ -219,7 +224,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> ForceVacant(string json) {
             try {
                 dynamic result = await http.Post("/api/sensor/force-vacant", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't send force vacant request");
                 throw;
@@ -235,7 +240,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> ForceOccupied(string json) {
             try {
                 dynamic result = await http.Post("/api/sensor/force-occupied", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't send force occupied request");
                 throw;
@@ -251,7 +256,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> EnableTransitionStateReporting(string json) {
             try {
                 dynamic result = await http.Post("/api/sensor/enable-transition-state-reporting", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't send enable transition state reporting request");
                 throw;
@@ -267,7 +272,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> DisableTransitionStateReporting(string json) {
             try {
                 dynamic result = await http.Post("/api/sensor/disable-transition-state-reporting", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't send disable transition state reporting request");
                 throw;
@@ -283,7 +288,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> SetLoraWakeupInterval(string json) {
             try {
                 dynamic result = await http.Post("/api/sensor/set-lora-wakeup-interval", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't send set wakeup interval request");
                 throw;
@@ -299,7 +304,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> SetLoraTxPower(string json) {
             try {
                 dynamic result = await http.Post("/api/sensor/set-lora-tx-power", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't send set Tx power request");
                 throw;
@@ -316,7 +321,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> SetTxSpreadingFactor(string json) {
             try {
                 dynamic result = await http.Post("/api/sensor/set-tx-spreading-factor", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't send set Tx spread factor request");
                 throw;
@@ -333,7 +338,7 @@ namespace PlacePodApiClient.API_Methods {
         public async Task<JArray> SetFrequencySubBand(string json) {
             try {
                 dynamic result = await http.Post("/api/sensor/set-frequency-sub-band", json);
-                return result;
+                return JsonConvert.DeserializeObject(result);
             } catch {
                 Console.WriteLine("Couldn't send set Tx spread factor request");
                 throw;

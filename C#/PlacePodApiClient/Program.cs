@@ -1,8 +1,8 @@
 ﻿using System;
-using PlacePodApiClient;
-using PlacePodApiClient.API_Methods;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using API_Methods;
+
 
 namespace PlacePodApiExample {
 
@@ -26,12 +26,8 @@ namespace PlacePodApiExample {
         //   2) click on settings > REST API 
         //   3) Click GENERATE API KEY 
         //   4) Copy the API URL and the API key into the below values
-        private static readonly string API_SERVER = "";
-        private static readonly string API_KEY = "";
-
-
-        private static Http HttpClient;
-
+        private static readonly string API_SERVER = "https://api-dev.pnicloud.com";
+        private static readonly string API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJjb21wYW5pZXNBY2NvdW50c0lkIiwidW5pcXVlX25hbWUiOiJzUndUUkRNS2JlZTNZcWdyeiIsIm5iZiI6MTUxOTI0NzQ0NCwiZXhwIjoxNjc3MDEzODQ0LCJpYXQiOjE1MTkyNDc0NDQsImlzcyI6Imh0dHBzOi8vd3d3LnBuaWNvcnAuY29tIiwiYXVkIjoiaHR0cHM6Ly93d3cucG5pY29ycC5jb20ifQ.J7Madn3UXJmrhvaQx1XDRua_w2ZKwgIh-HXhf63Bho8";
 
         /// <summary>
         /// Main function that initializes the two sample applications
@@ -41,13 +37,15 @@ namespace PlacePodApiExample {
             // Make sure these values are set. Program can't run without them!
             if (string.IsNullOrWhiteSpace(API_SERVER)) {
                 Console.WriteLine("API_SERVER variable not set!");
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
                 return;
             } else if (string.IsNullOrWhiteSpace(API_KEY)) {
                 Console.WriteLine("API_KEY variable not set!");
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
                 return;
             }
-
-            HttpClient = new Http(API_SERVER, API_KEY);
 
             // Program 1
             Console.WriteLine("This first sample application will test the get, insert, update, and remove functions" +
@@ -103,9 +101,9 @@ namespace PlacePodApiExample {
             // can cause the rest of the first app to not behave as desired.
             try {
 
-                GatewayMethods gatewayMethods = new GatewayMethods(HttpClient);
-                ParkingLotMethods parkingLotMethods = new ParkingLotMethods(HttpClient);
-                SensorMethods sensorMethods = new SensorMethods(HttpClient);
+                GatewayMethods gatewayMethods = new GatewayMethods(API_SERVER, API_KEY);
+                ParkingLotMethods parkingLotMethods = new ParkingLotMethods(API_SERVER, API_KEY);
+                SensorMethods sensorMethods = new SensorMethods(API_SERVER, API_KEY);
 
 
                 // Fetch all parking lots
@@ -297,7 +295,7 @@ namespace PlacePodApiExample {
         /// </summary>
         /// <param name="sensorId">ID of the sensor that the operations will be performed on</param>
         public async static Task SecondApp(string sensorId) {
-            SensorMethods sensorMethods = new SensorMethods(HttpClient);
+            SensorMethods sensorMethods = new SensorMethods(API_SERVER, API_KEY);
 
             Console.WriteLine("Running operations using sensor: " + sensorId);
             JObject json;
