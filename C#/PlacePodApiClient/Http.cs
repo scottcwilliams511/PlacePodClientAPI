@@ -43,8 +43,8 @@ namespace Http_Async {
         /// </summary>
         /// <param name="path">Route for the API method</param>
         /// <returns>Result of the request</returns>
-        public Task<string> Get(string path) {
-            return AsyncHttpRequest(path, null, "GET");
+        public async Task<string> Get(string path) {
+            return await AsyncHttpRequest(path, null, "GET");
         }
 
 
@@ -52,6 +52,7 @@ namespace Http_Async {
         /// Method for making a HTTP 'Post' request to the API
         /// </summary>
         /// <param name="path">Route for the API method</param>
+        /// <param name="data">JSON string payload</param>
         /// <returns>Result of the request</returns>
         public async Task<string> Post(string path, string data) {
             return await AsyncHttpRequest(path, data, "POST");
@@ -62,6 +63,7 @@ namespace Http_Async {
         /// Method for making a HTTP 'Put' request to the API
         /// </summary>
         /// <param name="path">Route for the API method</param>
+        /// <param name="data">JSON string payload</param>
         /// <returns>Result of the request</returns>
         public async Task<string> Put(string path, string data) {
             return await AsyncHttpRequest(path, data, "PUT");
@@ -72,6 +74,7 @@ namespace Http_Async {
         /// Method for making a HTTP 'Delete' request to the API
         /// </summary>
         /// <param name="path">Route for the API method</param>
+        /// <param name="data">JSON string payload</param>
         /// <returns>Result of the request</returns>
         public async Task<string> Delete(string path, string data) {
             return await AsyncHttpRequest(path, data, "DELETE");
