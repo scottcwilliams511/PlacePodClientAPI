@@ -1,19 +1,23 @@
 ﻿using Http_Async;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
 
-namespace API_Methods {
+
+namespace PlacePodApiClient.API_Methods {
 
     /// <summary>
+    /// Layer that attempts to abstract the http calls to the API.
     /// Contains all of the API methods related to a gateway
     /// </summary>
     internal class GatewayMethods {
 
         private HttpAsync http;
-        public GatewayMethods(string api_url, string api_key) {
-            http = new HttpAsync(api_url, api_key);
+
+        /// <summary>
+        /// Constructor. Sets the HttpAsync instance from Program
+        /// </summary>
+        public GatewayMethods() {
+            http = Program.http;
         }
 
 
@@ -22,10 +26,9 @@ namespace API_Methods {
         /// Route: '/api/gateways'
         /// </summary>
         /// <returns>Array of gateways</returns>
-        public async Task<JArray> GetGateways() {
+        public Task<string> GetGateways() {
             try {
-                dynamic result = await http.Get("/api/gateways");
-                return JsonConvert.DeserializeObject(result);
+                return http.Get("/api/gateways");
             } catch {
                 Console.WriteLine("Couldn't get Gateways");
                 throw;
@@ -38,10 +41,9 @@ namespace API_Methods {
         /// Route: '/api/gateway/insert'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public async Task<JArray> InsertGateway(string json) {
+        public Task<string> InsertGateway(string json) {
             try {
-                dynamic result = await http.Post("/api/gateway/insert", json);
-                return JsonConvert.DeserializeObject(result);
+                return http.Post("/api/gateway/insert", json);
             } catch {
                 Console.WriteLine("Couldn't Insert Gateway");
                 throw;
@@ -54,10 +56,9 @@ namespace API_Methods {
         /// Route: '/api/gateway/update'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public async Task<JArray> UpdateGateway(string json) {
+        public Task<string> UpdateGateway(string json) {
             try {
-               dynamic result = await http.Put("/api/gateway/update", json);
-                return JsonConvert.DeserializeObject(result);
+               return http.Put("/api/gateway/update", json);
             } catch {
                 Console.WriteLine("Couldn't Update Gateway");
                 throw;
@@ -70,10 +71,9 @@ namespace API_Methods {
         /// Route: '/api/gateway/remove'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public async Task<JArray> RemoveGateway(string json) {
+        public Task<string> RemoveGateway(string json) {
             try {
-                dynamic result = await http.Delete("/api/gateway/remove", json);
-                return JsonConvert.DeserializeObject(result);
+                return http.Delete("/api/gateway/remove", json);
             } catch {
                 Console.WriteLine("Couldn't Remove Gateway");
                 throw;

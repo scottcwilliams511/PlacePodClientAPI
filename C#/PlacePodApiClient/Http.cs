@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-/// <author>Scott Williams</author>
+
 namespace Http_Async {
     /// <summary>
     /// Class for making http requests. Inner logic is abstracted away so that 
@@ -18,11 +18,14 @@ namespace Http_Async {
         public string API_SERVER { private get; set; }
         public string API_KEY { private get; set; }
 
+        private HttpClient client;
+
         /// <summary>
         /// Default constructor. API_SERVER must be set later before making requests. API_KEY must be set
         /// for requests that require a header API key.
         /// </summary>
         public HttpAsync() {
+            client = new HttpClient();
         }
 
 
@@ -35,6 +38,8 @@ namespace Http_Async {
         public HttpAsync(string api_url, string api_key) {
             API_SERVER = api_url;
             API_KEY = api_key;
+
+            client = new HttpClient();
         }
 
 
@@ -43,8 +48,8 @@ namespace Http_Async {
         /// </summary>
         /// <param name="path">Route for the API method</param>
         /// <returns>Result of the request</returns>
-        public async Task<string> Get(string path) {
-            return await AsyncHttpRequest(path, null, "GET");
+        public Task<string> Get(string path) {
+            return AsyncHttpRequest(path, null, "GET");
         }
 
 
@@ -54,8 +59,8 @@ namespace Http_Async {
         /// <param name="path">Route for the API method</param>
         /// <param name="data">JSON string payload</param>
         /// <returns>Result of the request</returns>
-        public async Task<string> Post(string path, string data) {
-            return await AsyncHttpRequest(path, data, "POST");
+        public Task<string> Post(string path, string data) {
+            return AsyncHttpRequest(path, data, "POST");
         }
 
 
@@ -65,8 +70,8 @@ namespace Http_Async {
         /// <param name="path">Route for the API method</param>
         /// <param name="data">JSON string payload</param>
         /// <returns>Result of the request</returns>
-        public async Task<string> Put(string path, string data) {
-            return await AsyncHttpRequest(path, data, "PUT");
+        public Task<string> Put(string path, string data) {
+            return AsyncHttpRequest(path, data, "PUT");
         }
 
 
@@ -76,8 +81,8 @@ namespace Http_Async {
         /// <param name="path">Route for the API method</param>
         /// <param name="data">JSON string payload</param>
         /// <returns>Result of the request</returns>
-        public async Task<string> Delete(string path, string data) {
-            return await AsyncHttpRequest(path, data, "DELETE");
+        public Task<string> Delete(string path, string data) {
+            return AsyncHttpRequest(path, data, "DELETE");
         }
 
 
@@ -90,48 +95,48 @@ namespace Http_Async {
         /// <returns>dynamic JArray</returns>
         private async Task<string> AsyncHttpRequest(string path, string data, string method) {
             try {
-                HttpClient client = new HttpClient();
-                HttpRequestMessage request = new HttpRequestMessage() {
-                    RequestUri = new Uri(API_SERVER + path),
-                    Method = new HttpMethod(method)
-                };
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                if (API_KEY != null) {
-                    request.Headers.Add("X-API-KEY", API_KEY);
-                }
+                using (HttpRequestMessage request = new HttpRequestMessage()) {
+                    request.RequestUri = new Uri(API_SERVER + path);
+                    request.Method = new HttpMethod(method);
+                    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                // Only add data if the user passed some, ie POST call
-                if (data != null) {
-                    request.Content = new StringContent(data, Encoding.UTF8, "application/json");
-                }
+                    if (API_KEY != null) {
+                        request.Headers.Add("X-API-KEY", API_KEY);
+                    }
 
-                HttpResponseMessage response = await client.SendAsync(request);
-                string responseMsg = await response.Content.ReadAsStringAsync();
+                    // Only add data if the user passed some, ie POST call
+                    if (data != null) {
+                        request.Content = new StringContent(data, Encoding.UTF8, "application/json");
+                    }
 
-                // If the API doesn't return code 200, then something went wrong
-                int status = (int)response.StatusCode;
-                if (status != 200) {
-                    if (status == 401) {
-                        throw new Exception("\"HTTP Error 401\" - Unauthorized: Access is denied due to invalid credentials.");
-                    } else if (status == 404) {
-                        throw new Exception("\"HTTP Error 404\" - Not Found.");
-                    } else if (status == 415) {
-                        throw new Exception("\"HTTP Error 415\" - Unsupported media type.");
-                    } else {
-                        string message = null;
-                        try {
-                            // Try to make the error message more readable if possible.
-                            dynamic errorJson = JsonConvert.DeserializeObject(responseMsg);
-                            message = "\"HTTP ERROR " + status + "\" - " + errorJson.Code + ": " + errorJson.Message;
-                        } catch {
-                            message = "\"HTTP ERROR " + status + "\" - " + responseMsg;
+                    using (HttpResponseMessage response = await client.SendAsync(request)) {
+                        string responseMsg = await response.Content.ReadAsStringAsync();
+
+                        // If the API doesn't return code 200, then something went wrong
+                        int status = (int)response.StatusCode;
+                        if (status != 200) {
+                            if (status == 401) {
+                                throw new Exception("\"HTTP Error 401\" - Unauthorized: Access is denied due to invalid credentials.");
+                            } else if (status == 404) {
+                                throw new Exception("\"HTTP Error 404\" - Not Found.");
+                            } else if (status == 415) {
+                                throw new Exception("\"HTTP Error 415\" - Unsupported media type.");
+                            } else {
+                                string message = null;
+                                try {
+                                    // Try to make the error message more readable if possible.
+                                    dynamic errorJson = JsonConvert.DeserializeObject(responseMsg);
+                                    message = "\"HTTP ERROR " + status + "\" - " + errorJson.Code + ": " + errorJson.Message;
+                                } catch {
+                                    message = "\"HTTP ERROR " + status + "\" - " + responseMsg;
+                                }
+                                throw new Exception(message);
+                            }
                         }
-                        throw new Exception(message);
+                        return responseMsg;
                     }
                 }
-
-                return responseMsg;
             } catch {
                 Console.WriteLine("Http " + method + " error");
                 throw;

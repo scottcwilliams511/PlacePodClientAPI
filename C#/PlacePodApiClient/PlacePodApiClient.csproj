@@ -53,10 +53,12 @@
   <ItemGroup>
     <Compile Include="API_Methods\GatewayMethods.cs" />
     <Compile Include="API_Methods\SensorMethods.cs" />
+    <Compile Include="FirstApp.cs" />
     <Compile Include="Http.cs" />
     <Compile Include="API_Methods\ParkingLotMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SecondApp.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
