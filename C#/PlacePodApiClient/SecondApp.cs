@@ -14,17 +14,17 @@ namespace PlacePodApiClient {
     /// diagnostic information.
     /// The tasks that can be optionally performed are:
     ///   1) Get sensor history at a specific 10 minute interval
-    ///   2) Send a recalibrate
+    ///   2) Send a recalibrate request
     ///   3) Run a full BIST test (give up to 5 minutes for a response)
     ///   4) Send a ping and wait for response (up to 5 minutes)
-    ///   5) Send a force vacant
-    ///   6) Send a force occupied
-    ///   7) Send an enable transition state reporting
-    ///   8) Send a disable transition state reporting
-    ///   9) Send a set lora wakeup interval to 5 minutes
-    ///  10) Send a set loRa Tx power call to 11dB.
-    ///  11) Send a set Tx spreading factor call to SF 7, BW 125 kHz
-    ///  12) Send a set frequency sub band call to 902.3 kHz - 903.7 kHz - 125k
+    ///   5) Send a force vacant request
+    ///   6) Send a force occupied request
+    ///   7) Send an enable transition state reporting request
+    ///   8) Send a disable transition state reporting request
+    ///   9) Send a set lora wakeup interval to 5 minutes request
+    ///  10) Send a set loRa Tx power call to 11dB request
+    ///  11) Send a set Tx spreading factor call to SF 7, BW 125 kHz request
+    ///  12) Send a set frequency sub band call to 902.3 kHz - 903.7 kHz - 125k request
     /// Please note that steps 10, 11, 12 are potentially dangerous if set incorrectly and
     /// may cause the placePod to go offline permanently. Please read available documentation
     /// on the API swagger page first!
@@ -38,13 +38,13 @@ namespace PlacePodApiClient {
         /// <summary>
         /// ISO date string of a time when your sensor was on
         /// </summary>
-        private static readonly string startTime = "2017-12-08T01:00:00.000Z";
+        private readonly string startTime = "2017-12-08T01:00:00.000Z";
 
 
         /// <summary>
         /// ISO date string of a later time when your sensor was on
         /// </summary>
-        private static readonly string endTime = "2017-12-08T01:10:00.000Z";
+        private readonly string endTime = "2017-12-08T01:10:00.000Z";
 
 
         /// <summary>
@@ -95,16 +95,16 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Contains the API methods for a sensor
         /// </summary>
-        private static SensorMethods sensorMethods = new SensorMethods();
+        private SensorMethods sensorMethods = new SensorMethods();
 
-        private static string sensorId;
+        private string sensorId;
 
         /// <summary>
         /// Fetch sensor history within the timespan and report the number of results.
         /// Check private variables 'startTime' and 'endTime' for the timespan
         /// and adjust these as needed!
         /// </summary>
-        private async static Task GetSensorHistoryCount() {
+        private async Task GetSensorHistoryCount() {
             Console.WriteLine("Test /api/sensor/history");
 
             Console.WriteLine("Get Sensor History (y/n)? ");
@@ -133,7 +133,7 @@ namespace PlacePodApiClient {
         /// Send down a recalibrate request
         /// </summary>
         /// <returns></returns>
-        private async static Task SendRecalibrate() {
+        private async Task SendRecalibrate() {
             Console.WriteLine("Test /api/sensor/recalibrate");
 
             Console.WriteLine("Recalibrate sensor (y/n)? ");
@@ -222,7 +222,7 @@ namespace PlacePodApiClient {
         /// Send down a Ping request and wait up to 5 minutes for the response
         /// </summary>
         /// <returns></returns>
-        private static async Task FullPingTest() {
+        private async Task FullPingTest() {
             Console.WriteLine("Test /api/sensor/ping and /api/sensor/ping-response/{SensorId}/{LastUpdated}");
             Console.WriteLine("Ping sensor (y/n)?");
             string input = Console.ReadLine();
@@ -282,7 +282,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Force the sensor's Car Presence to say vacant
         /// </summary>
-        private static async Task ForceVacant() {
+        private async Task ForceVacant() {
             Console.WriteLine("Test /api/sensor/force-vacant");
             Console.WriteLine("Force car presence to vacant (y/n)?");
             string input = Console.ReadLine();
@@ -309,7 +309,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Force the sensor's Car Presence to say occcupied
         /// </summary>
-        private static async Task ForceOccupied() {
+        private async Task ForceOccupied() {
             Console.WriteLine("Test /api/sensor/force-occupied");
             Console.WriteLine("Force car presence to occupied (y/n)?");
             string input = Console.ReadLine();
@@ -336,7 +336,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Enables transition state reporting for the sensor
         /// </summary>
-        private static async Task EnableTransitionStateReporting() {
+        private async Task EnableTransitionStateReporting() {
             Console.WriteLine("Test /api/sensor/enable-transition-state-reporting");
             Console.WriteLine("Enable transition state reporting (y/n)?");
             string input = Console.ReadLine();
@@ -364,7 +364,7 @@ namespace PlacePodApiClient {
         /// Disables transition state reporting for the sensor
         /// </summary>
         /// <returns></returns>
-        private static async Task DisableTransitionStateReporting() {
+        private async Task DisableTransitionStateReporting() {
             Console.WriteLine("Test /api/sensor/disable-transition-state-reporting");
             Console.WriteLine("Disable transition state reporting (y/n)?");
             string input = Console.ReadLine();
@@ -391,7 +391,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Sets the sensor's wakeup interval to every 5 minutes.
         /// </summary>
-        private static async Task SetWakeupInterval() {
+        private async Task SetWakeupInterval() {
             Console.WriteLine("Test /api/sensor/set-lora-wakeup-interval");
             Console.WriteLine("Set LoRa wakeup interval to 5 minutes (y/n)?");
             string input = Console.ReadLine();
@@ -419,7 +419,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// This will set the sensor's LoRa Tx power to ll dBs.
         /// </summary>
-        private static async Task SetTxPower() {
+        private async Task SetTxPower() {
             Console.WriteLine("Test /api/sensor/set-lora-tx-power");
             Console.WriteLine("Set LoRa Tx Power to 11 (y/n)?");
             string input = Console.ReadLine();
@@ -447,7 +447,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Change the sensor's spread factor to 7, BW 125 kHz
         /// </summary>
-        private static async Task SetSpreadFactor() {
+        private async Task SetSpreadFactor() {
             Console.WriteLine("Test /api/sensor/set-tx-spreading-factor");
             Console.WriteLine("Set Tx Spread Factor to SF 7, BW 125 kHz (y/n)?");
             string input = Console.ReadLine();
@@ -475,7 +475,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Set sensor's frequency sub band to 902.3 kHz - 903.7 kHz - 125k"
         /// </summary>
-        private static async Task SetFrequencySubBand() {
+        private async Task SetFrequencySubBand() {
             Console.WriteLine("Test /api/sensor/set-frequency-sub-band");
             Console.WriteLine("Set Frequency sub band to 902.3 kHz - 903.7 kHz - 125k");
             string input = Console.ReadLine();

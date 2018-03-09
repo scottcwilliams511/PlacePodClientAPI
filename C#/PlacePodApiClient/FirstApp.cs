@@ -80,15 +80,15 @@ namespace PlacePodApiClient {
         }
 
 
-        private static GatewayMethods gatewayMethods = new GatewayMethods();
-        private static ParkingLotMethods parkingLotMethods = new ParkingLotMethods();
-        private static SensorMethods sensorMethods = new SensorMethods();
+        private GatewayMethods gatewayMethods = new GatewayMethods();
+        private ParkingLotMethods parkingLotMethods = new ParkingLotMethods();
+        private SensorMethods sensorMethods = new SensorMethods();
 
 
         /// <summary>
         /// Fetch all of the parking lots and print them out
         /// </summary>
-        private async static Task GetParkingLots() {
+        private async Task GetParkingLots() {
             Console.WriteLine("Testing '/api/parking-lots'");
 
             string result = await parkingLotMethods.GetParkingLots();
@@ -105,7 +105,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Fetch all of the sensors and print them out
         /// </summary>
-        private async static Task GetSensors() {
+        private async Task GetSensors() {
             Console.WriteLine("Testing '/api/sensors'");
 
             string result = await sensorMethods.GetSensors("{}");
@@ -122,7 +122,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Fetch all of the gateways and print them out
         /// </summary>
-        private async static Task GetGateways() {
+        private async Task GetGateways() {
             Console.WriteLine("Testing '/api/gateways'");
 
             string result = await gatewayMethods.GetGateways();
@@ -140,7 +140,7 @@ namespace PlacePodApiClient {
         /// Insert a new parking lot named "TEST: C#-api-lot-insert"
         /// </summary>
         /// <returns>New parking lot's Id</returns>
-        private async static Task<string> InsertParkingLot() {
+        private async Task<string> InsertParkingLot() {
             Console.WriteLine("Testing '/api/parking-lot/insert'");
 
             // Sample JSON to send
@@ -175,7 +175,7 @@ namespace PlacePodApiClient {
         /// Update that new parking lot's name to "TEST: C#-api-lot-update"
         /// </summary>
         /// <param name="parkingLotId">Id of the new parking lot</param>
-        private async static Task UpdateParkingLot(string parkingLotId) {
+        private async Task UpdateParkingLot(string parkingLotId) {
             Console.WriteLine("Testing '/api/parking-lot/update'");
 
             // Sample JSON to send
@@ -194,7 +194,7 @@ namespace PlacePodApiClient {
         /// </summary>
         /// <param name="sensorId">The Id of the sensor to insert</param>
         /// <param name="parkingLotId">The Id of the parking lot inserted earlier</param>
-        private async static Task InsertSensor(string sensorId, string parkingLotId) {
+        private async Task InsertSensor(string sensorId, string parkingLotId) {
             Console.WriteLine("Testing '/api/sensor/insert'");
 
             // Sample JSON to send
@@ -217,7 +217,7 @@ namespace PlacePodApiClient {
         /// Update that new sensor's name to "TEST: c#-api-sensor-update". Also update its location.
         /// </summary>
         /// <param name="sensorId">The Id of the inserted sensor</param>
-        private async static Task UpdateSensor(string sensorId) {
+        private async Task UpdateSensor(string sensorId) {
             Console.WriteLine("Testing '/api/sensor/update'");
 
             // Sample JSON to send
@@ -238,7 +238,7 @@ namespace PlacePodApiClient {
         /// </summary>
         /// <param name="parkingLotId">The Id of the parking lot inserted earlier</param>
         /// <returns>New gateway's Id</returns>
-        private async static Task<string> InsertGateway(string parkingLotId) {
+        private async Task<string> InsertGateway(string parkingLotId) {
             Console.WriteLine("Testing '/api/gateway/insert'");
 
             // Sample JSON to send
@@ -271,7 +271,7 @@ namespace PlacePodApiClient {
         /// Update that new gateway's name to "TEST: C#-api-gateway-update"
         /// </summary>
         /// <param name="gatewayId">The Id of the inserted gateway</param>
-        private async static Task UpdateGateway(string gatewayId) {
+        private async Task UpdateGateway(string gatewayId) {
             Console.WriteLine("Testing '/api/gateway/update'");
 
             // Sample JSON to send
@@ -289,7 +289,7 @@ namespace PlacePodApiClient {
         /// Remove that updated gateway
         /// </summary>
         /// <param name="gatewayId">The Id of the updated gateway</param>
-        private async static Task RemoveGateway(string gatewayId) {
+        private async Task RemoveGateway(string gatewayId) {
             Console.WriteLine("Testing '/api/gateway/remove'");
 
             // Sample JSON to send
@@ -306,7 +306,7 @@ namespace PlacePodApiClient {
         /// Remove that updated sensor
         /// </summary>
         /// <param name="sensorId">The Id of the updated sensor</param>
-        private async static Task RemoveSensor(string sensorId) {
+        private async Task RemoveSensor(string sensorId) {
             Console.WriteLine("Testing '/api/sensor/remove'");
 
             // Sample JSON to send
@@ -323,7 +323,7 @@ namespace PlacePodApiClient {
         /// Remove that updated parking lot
         /// </summary>
         /// <param name="parkingLotId">The Id of the updated parking lot</param>
-        private async static Task RemoveParkingLot(string parkingLotId) {
+        private async Task RemoveParkingLot(string parkingLotId) {
             Console.WriteLine("Testing '/api/parking-lot/remove'");
 
             // Sample JSON to send
