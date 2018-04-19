@@ -3,7 +3,7 @@
 The PlacePod cloud offers an asynchronous MQTT API for notifications. 
 Additionally, a <a href="https://api.pnicloud.com">REST API</a> is available for syncronous based web services.
 
- 
+ Last Updated: April 19th, 2018
 
 ## Rest Web API
 The Rest API may be invoked at any time retrieve sensor status, and history values for parking spaces and lots. Also, downlink communication to the sensor is done via the REST Api.
@@ -42,30 +42,30 @@ The Rest API may be invoked at any time retrieve sensor status, and history valu
 	 	 - **placepod/uplink/+/0080000004000675**
 		 	 - Single sensor		 	 
 	 - See <a href="http://www.hivemq.com/blog/mqtt-essentials-part-5-mqtt-topics-best-practices">MQTT Topics</a> for more information.
- - Note: To issue commands (Recalibrate, BISTest, SetWakeupInterval) please use the REST API.   
+ - Note: To issue commands (Recalibrate, BISTest, SetWakeupInterval) please use the REST API.
+
+ - Note: Message Retain is enabled so that you will get the last sent packet (per sensor) if your MQTT client disconnects.
 
 ### MQTT Packet format
 
 Mqtt packet format is a JSON object defined as follows:
 
-- `sensorId:` 16 Digit Hex ID. Ex`: '0080000004000675'
-- `parkingSpace:` Space PlacePod is assigned to. Ex`: 'Space #54'
-- `network`: Network this sensor is asigned to. Ex`: 'PNI' or  'SENET'
-- `location`: Not used.
-- `installationDate`: Not used
-- `lat`: Location of Sensor Ex`: 38.42074876336795
-- `lon`: Location of Sensor Ex:-122.75509041539759
-- `createdAt`: Date of Sensor Creation. Ex`: '2017-05-03T21:12:52.974Z'
-- `hostFirmware`: Host Firmware Revision. Ex`: '0.3.39'
-- `sensorFirmware`: Sentral Firmware Revision. Ex`: '1.3.0.0.284'
-- `parkingName`: Name of Parking Lot. Ex`: 'Electric Vehicle Parking Lot'
-- `validationInProcess`: Internal QA Validation Flag.    
-- `GatewayTime`: Event Timestamp from Gateway. Subject to clock drift and misconfigured gateways. Ex`: '2017-06-06T17:23:57.834Z'
-- `SENtralTime`: Internal 36 bit timestamp in ticks. Ex`: 309467131
-- `ServerTime`: Canonical Event Timestemp from Server. '2017-06-06T17:17:08.977Z'
-- `CarPresence`: State of sensor 0 = Initialization/startup (never published) 1 = No Car Present 2 = Car Entering Space 3 = Parked Car Detected 4 = Car Leaving Space 
-- `Confidence`: Not Used.
-- `Temperature`: Temperature in celcius. Ex`: 23
-- `Battery`: Battery Voltage  ex`: 3.6482174396514893
-- `status`: Human readable Placepod status`: occupied, vacant, car entering, car leaving
+- `sensorId`: 16 Digit Hex ID. Ex: `'0080000004000675'`
+- `parkingSpace`: Space PlacePod is assigned to. Ex: `'Space #54'`
+- `network`: Network this sensor is asigned to. Ex: `'PNI'` or  `'SENET'`
+- `lat`: Location of Sensor Ex: `38.42074876336795`
+- `lon`: Location of Sensor Ex: `-122.75509041539759`
+- `createdAt`: Date of Sensor Creation. Ex: `'2017-05-03T21:12:52.974Z'`
+- `parkingName`: Name of Parking Lot. Ex: `'Electric Vehicle Parking Lot' `
+- `hostFirmware`: Host Firmware Revision. Ex: `'0.3.39'`
+- `sensorFirmware`: Sentral Firmware Revision. Ex: `'1.3.0.0.284'`
+- `Temperature`: Temperature in celcius. Ex: `23`
+- `Battery`: Battery Voltage  Ex: `3.6482174396514893`
+- `GatewayTime`: Event Timestamp from Gateway. Subject to clock drift and misconfigured gateways. Ex: `'2017-06-06T17:23:57.834Z'`
+- `SENtralTime`: Internal 36 bit timestamp in ticks. Ex: `309467131`
+- `ServerTime`: Canonical Event Timestemp from Server. Ex: `'2017-06-06T17:17:08.977Z'`
+- `CarPresence`: State of sensor `0` = Initialization/startup (never published). `1` = No Car Present. `2` = Car Entering Space. `3` = Parked Car Detected. `4` = Car Leaving Space.
+- `rssi`: Received signal strength indicator in dB(s). Ex: `-79`
+- `snr`: Signal to Noise Ratio. E: `11.6`
+- `status`: Human readable Placepod status: `occupied`, `vacant`, `car entering`, `car leaving`
 

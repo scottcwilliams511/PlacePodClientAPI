@@ -3,7 +3,7 @@
 # File: MQTT.py                                    #
 # Author: Scott Williams swilliams@pnicorp.com     #
 # Date: June 8th, 2017                             #
-# Last updated: December 13th, 2017                #
+# Last updated: April 19th, 2018                   #
 # Developed in: PyCharm Community Edition 2016.3.2 #
 # Project interpreter: 3.5.0                       #
 # Tests the MQTT API for PlacePod. Will run until  #
@@ -30,11 +30,11 @@ import json
 # For serverURL, don't include "mqtts://" or ":8883", otherwise the connection will not work
 
 
-serverURL = ""
-username = ""
-password = ""
+serverURL = "api-dev.pnicloud.com"
+username = "uI28Z-pCPMk"
+password = "PoCraxsX7Ik"
 
-topic = ""
+topic = "#"
 
 # Port used
 port = 8883
@@ -43,57 +43,6 @@ port = 8883
 class Payload(object):
     def __init__(self, j):
         self.__dict__ = json.loads(j)
-
-# Old non dynamic code for reference
-'''
-# Api value fields for a sensor as an object
-class SensorInfo(object):
-    def __init__(self, sensorId, parkingSpace, network, location, installationDate,
-                 lat, lon, createdAt, hostFirmware, sensorFirmware, parkingName,
-                 validationInProcess, GatewayTime, SENtralTime, ServerTime,
-                 CarPresence, Confidence, Temperature, Battery, status):
-        self.sensorId = sensorId
-        self.parkingSpace = parkingSpace
-        self.network = network
-        self.location = location
-        self.installationDate = installationDate
-        self.lat = lat
-        self.lon = lon
-        self.createdAt = createdAt
-        self.hostFirmware = hostFirmware
-        self.sensorFirmware = sensorFirmware
-        self.parkingName = parkingName
-        self.validationInProcess = validationInProcess
-        self.GatewayTime = GatewayTime
-        self.SENtralTime = SENtralTime
-        self.ServerTime = ServerTime
-        self.CarPresence = CarPresence
-        self.Confidence = Confidence
-        self.Temperature = Temperature
-        self.Battery = Battery
-        self.status = status
-
-
-# Create a SensorInfo object using the dictionary grabbed from the JSON
-def createSensorInfoPayload(dct):
-
-    # This was going to set missing packet fields to NULL so the program wouldn't crash
-    if not 'network' in dct:
-        network = ""
-    else:
-        network = dct['network']
-
-    if not 'hostFirmware' in dct:
-        hostFirmware = ""
-    else:
-        hostFirmware = dct['hostFirmware']  # Switched to dynamic object use at this point
-
-    return SensorInfo(dct['sensorId'], dct['parkingSpace'], network, dct['location'],
-                      dct['installationDate'],dct['lat'], dct['lon'], dct['createdAt'], hostFirmware,
-                      dct['sensorFirmware'], dct['parkingName'], dct['validationInProcess'], dct['GatewayTime'],
-                      dct['SENtralTime'], dct['ServerTime'], dct['CarPresence'], dct['Confidence'], dct['Temperature'],
-                      dct['Battery'], dct['status'])
-'''
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, rc):
@@ -130,9 +79,6 @@ def on_message(client, userdata, msg):
     # Breaks the json into a list of Sensor objects
     payload = Payload(result)
 
-    # Old non dynamic call create objects, again just left for reference
-    #payload = json.loads(result, object_hook= createSensorInfoPayload)
-
     # Output each value from the packet, if the field is there
     # Having there checks ensures that the script won't crash should a packet
     # be missing a field it could have
@@ -145,24 +91,22 @@ def on_message(client, userdata, msg):
         print("parkingSpace: " + payload.parkingSpace)
     if hasattr(payload, 'network'):
         print("network: " + payload.network)
-    if hasattr(payload, 'location'):
-        print("location: " + payload.location)
-    if hasattr(payload, 'installationDate'):
-        print("installationDate: " + str(payload.installationDate))
     if hasattr(payload, 'lat'):
         print("lat: " + str(payload.lat))
     if hasattr(payload, 'lon'):
         print("lon: " + str(payload.lon))
     if hasattr(payload, 'createdAt'):
         print("createdAt: " + payload.createdAt)
+    if hasattr(payload, 'parkingName'):
+        print("parkingName: " + payload.parkingName)
     if hasattr(payload, 'hostFirmware'):
         print("hostFirmware: " + payload.hostFirmware)
     if hasattr(payload, 'sensorFirmware'):
         print("sensorFirmware: " + payload.sensorFirmware)
-    if hasattr(payload, 'parkingName'):
-        print("parkingName: " + payload.parkingName)
-    if hasattr(payload, 'validationInProcess'):
-        print("validationInProcess: " + str(payload.validationInProcess))
+    if hasattr(payload, 'Temperature'):
+        print("Temperature: " + str(payload.Temperature))
+    if hasattr(payload, 'Battery'):
+        print("Battery: " + str(payload.Battery))
     if hasattr(payload, 'GatewayTime'):
         print("GatewayTime: " + payload.GatewayTime)
     if hasattr(payload, 'SENtralTime'):
@@ -171,12 +115,10 @@ def on_message(client, userdata, msg):
         print("ServerTime: " + payload.ServerTime)
     if hasattr(payload, 'CarPresence'):
         print("CarPresence: " + str(payload.CarPresence))
-    if hasattr(payload, 'Confidence'):
-        print("Confidence: " + str(payload.Confidence))
-    if hasattr(payload, 'Temperature'):
-        print("Temperature: " + str(payload.Temperature))
-    if hasattr(payload, 'Battery'):
-        print("Battery: " + str(payload.Battery))
+    if hasattr(payload, 'rssi'):
+        print("RSSI: " + str(payload.rssi))
+    if hasattr(payload, 'snr'):
+        print("SNR: " + str(payload.snr))
     if hasattr(payload, 'status'):
         print("status: " + payload.status)
 
@@ -237,7 +179,7 @@ def main():
     #    client.tls_set("./SFSRootCAG2.pem")
     #    or
     #    client.tls_set(0)
-    client.tls_set(0)
+    client.tls_set("./SFSRootCAG2.pem")
     print("TLS successfully set!")
 
     # Establish the connection to the broker
