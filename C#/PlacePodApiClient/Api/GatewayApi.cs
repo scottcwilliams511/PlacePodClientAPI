@@ -1,24 +1,20 @@
 ﻿using Http_Async;
+using PlacePodApiClient.Helpers;
+using PlacePodApiClient.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 
-namespace PlacePodApiClient.API_Methods {
+namespace PlacePodApiClient.Api {
 
     /// <summary>
     /// Layer that attempts to abstract the http calls to the API.
     /// Contains all of the API methods related to a gateway
     /// </summary>
-    internal class GatewayMethods {
+    internal static class GatewayMethods {
 
-        private HttpAsync http;
-
-        /// <summary>
-        /// Constructor. Sets the HttpAsync instance from Program
-        /// </summary>
-        public GatewayMethods() {
-            http = Program.http;
-        }
+        private static HttpAsync http = Program.http;
 
 
         /// <summary>
@@ -26,9 +22,10 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/gateways'
         /// </summary>
         /// <returns>Array of gateways</returns>
-        public Task<string> GetGateways() {
+        public static async Task<List<Gateway>> GetGateways() {
             try {
-                return http.Get("/api/gateways");
+                string gateways = await http.Get("/api/gateways");
+                return Factories.CreateCollection<Gateway>(gateways);
             } catch {
                 Console.WriteLine("Couldn't get Gateways");
                 throw;
@@ -41,7 +38,7 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/gateway/insert'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public Task<string> InsertGateway(string json) {
+        public static Task<string> InsertGateway(string json) {
             try {
                 return http.Post("/api/gateway/insert", json);
             } catch {
@@ -56,7 +53,7 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/gateway/update'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public Task<string> UpdateGateway(string json) {
+        public static Task<string> UpdateGateway(string json) {
             try {
                return http.Put("/api/gateway/update", json);
             } catch {
@@ -71,7 +68,7 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/gateway/remove'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public Task<string> RemoveGateway(string json) {
+        public static Task<string> RemoveGateway(string json) {
             try {
                 return http.Delete("/api/gateway/remove", json);
             } catch {

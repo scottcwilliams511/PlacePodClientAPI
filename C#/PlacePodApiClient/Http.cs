@@ -15,10 +15,22 @@ namespace Http_Async {
     /// Supports HTTP GET, POST, PUT, and DELETE methods.
     /// </summary>
     internal class HttpAsync {
+
+        /// <summary>
+        /// Base URL of the PlacePod API
+        /// </summary>
         public string API_SERVER { private get; set; }
+
+        /// <summary>
+        /// JWT token used for authentication
+        /// </summary>
         public string API_KEY { private get; set; }
 
+        /// <summary>
+        /// Provides a base class for sending HTTP requests and receiving HTTP responses from a resource identified by a URI.
+        /// </summary>
         private HttpClient client;
+
 
         /// <summary>
         /// Default constructor. API_SERVER must be set later before making requests. API_KEY must be set

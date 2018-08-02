@@ -1,0 +1,121 @@
+This first sample application will test the get, insert, update, and remove functions of 'gateways', 'parking-lots', and sensors'.
+Run first sample application (y/n)?
+y
+Testing '/api/parking-lots'
+Got 1 Parking Lots:
+--> wf7HJNnEP2bB3CdEk: SW Testing
+
+Testing '/api/sensors'
+Got 3 Sensors:
+--> 0999999999999999: newPniSpace1, Unknown, SW Testing
+--> 008000000400065d: drive-through-065d, Vacant, SW Testing
+--> 00800000040014c4: 14c4-to-scott-4-testing, Occupied, SW Testing
+
+Testing '/api/gateways'
+Got 1 Gateways:
+--> 00800000a0000564: testing
+
+Testing '/api/parking-lot/insert'
+Parking Lot Insert Success
+ID of inserted parking lot: 5b638a3a97e4c600011ed8f9
+
+Testing '/api/parking-lot/update'
+Parking Lot Update Success
+
+Testing '/api/sensor/insert'
+Sensor Insert Success
+
+Testing '/api/sensor/update'
+Sensor Update Success
+
+Testing '/api/gateway/insert'
+Gateway Insert Success
+ID of inserted gateway: 5b638a3b97e4c600011ed8fb
+
+Testing '/api/gateway/update'
+Gateway Update Success
+
+Testing '/api/gateway/remove'
+Gateway Remove Success
+
+Testing '/api/sensor/remove'
+Sensor Remove Success
+
+Testing '/api/parking-lot/remove'
+Parking Lot Remove Success
+
+Press any key to continue...
+ This second sample application will test the other 'sensor' operaions. A sensor ID must be provided to proceed.
+Run second sample application (y/n)?
+y
+Enter sensor ID:
+008000000400065d
+Running operations using sensor: 008000000400065d
+Test /api/sensor/history
+Get Sensor History (y/n)?
+y
+Number of results: 2
+
+Test /api/sensor/recalibrate
+Recalibrate sensor (y/n)?
+n
+Test /api/initialize-bist and /api/sensor/bist-response/{SensorId}/{LastUpdated}
+Run basic internal self test (BIST) (y/n)?
+y
+Sending BIST request...
+BIST Sent at UTC: 2018-08-02T22:48:41
+Waiting for Bist response 1
+Waiting for Bist response 2
+Waiting for Bist response 3
+Waiting for Bist response 4
+Waiting for Bist response 5
+Waiting for Bist response 6
+Waiting for Bist response 7
+Waiting for Bist response 8
+Waiting for Bist response 9
+Waiting for Bist response 10
+Waiting for Bist response 11
+Waiting for Bist response 12
+Waiting for Bist response 13
+BIST response recieved!
+--> UNCALIBRATED MAGNETOMETER: TEST PASSED
+
+Test /api/sensor/ping and /api/sensor/ping-response/{SensorId}/{LastUpdated}
+Ping sensor (y/n)?
+y
+Sending Ping request...
+Ping Sent at UTC: 2018-08-02T22:48:57
+Waiting for Ping response 1
+Waiting for Ping response 2
+Waiting for Ping response 3
+Ping response recieved!
+--> Ping RSSI: -57, Ping SNR: 7.2. Server time: 8/2/2018 3:49:00 PM
+
+Test /api/sensor/force-vacant
+Force car presence to vacant (y/n)?
+n
+Test /api/sensor/force-occupied
+Force car presence to occupied (y/n)?
+n
+Test /api/sensor/enable-transition-state-reporting
+Enable transition state reporting (y/n)?
+n
+Test /api/sensor/disable-transition-state-reporting
+Disable transition state reporting (y/n)?
+n
+Test /api/sensor/set-lora-wakeup-interval
+Set LoRa wakeup interval to 5 minutes (y/n)?
+y
+Sending set LoRa wakeup interval...
+Set LoRa wakeup interval Sent
+
+Test /api/sensor/set-lora-tx-power
+Set LoRa Tx Power to 11 (y/n)?
+n
+Test /api/sensor/set-tx-spreading-factor
+Set Tx Spread Factor to SF 7, BW 125 kHz (y/n)?
+n
+Test /api/sensor/set-frequency-sub-band
+Set Frequency sub band to 902.3 kHz - 903.7 kHz - 125k
+n
+Press any key to continue...

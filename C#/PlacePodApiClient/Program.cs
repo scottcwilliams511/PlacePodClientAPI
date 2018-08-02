@@ -29,8 +29,11 @@ namespace PlacePodApiClient {
         public static readonly string API_SERVER = "";
         public static readonly string API_KEY = "";
 
-
+        /// <summary>
+        /// Http Client used to make post, get, etc... requests to the PlacePod API.
+        /// </summary>
         internal static HttpAsync http;
+
 
         /// <summary>
         /// Main function that initializes the two sample applications
@@ -52,17 +55,13 @@ namespace PlacePodApiClient {
                 Console.ReadKey();
                 return;
             }
-
             http = new HttpAsync(API_SERVER, API_KEY);
 
             /** Program 1 */
-            FirstApp app_1 = new FirstApp();
-            app_1.Run();
-
+            FirstApp.Run();
 
             /** Program 2 */
-            SecondApp app_2 = new SecondApp();
-            app_2.Run();
+            SecondApp.Run();
         }
     }
 }

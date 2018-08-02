@@ -1,27 +1,25 @@
 ﻿using Http_Async;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PlacePodApiClient.Helpers;
+using PlacePodApiClient.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 
-namespace PlacePodApiClient.API_Methods {
+namespace PlacePodApiClient.Api {
 
     /// <summary>
     /// Layer that attempts to abstract the http calls to the API.
     /// Contains all of the API methods related to a sensor.
     /// </summary>
-    internal class SensorMethods {
-
-        private HttpAsync http;
+    internal static class SensorApi {
 
         /// <summary>
-        /// Constructor. Sets the HttpAsync instance from Program
+        /// Http Client initialized in Program.
         /// </summary>
-        public SensorMethods() {
-            http = Program.http;
-        }
-
+        private static HttpAsync http = Program.http;
 
         /// <summary>
         /// Get Sensors.
@@ -29,9 +27,10 @@ namespace PlacePodApiClient.API_Methods {
         /// </summary>
         /// <param name="filter">Optional</param>
         /// <returns>Array of sensors</returns>
-        public Task<string> GetSensors(string filter) {
+        public static async Task<List<Sensor>> GetSensors(string filter) {
             try {
-                return http.Post("/api/sensors", filter);
+                string sensors = await http.Post("/api/sensors", filter);
+                return Factories.CreateCollection<Sensor>(sensors);
             } catch {
                 Console.WriteLine("Couldn't get Sensors");
                 throw;
@@ -44,7 +43,7 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/insert'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public Task<string> InsertSensor(string json) {
+        public static Task<string> InsertSensor(string json) {
             try {
                 return http.Post("/api/sensor/insert", json);
             } catch {
@@ -59,7 +58,7 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/update'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public Task<string> UpdateSensor(string json) {
+        public static Task<string> UpdateSensor(string json) {
             try {
                 return http.Put("/api/sensor/update", json);
             } catch {
@@ -74,7 +73,7 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/remove'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public Task<string> RemoveSensor(string json) {
+        public static Task<string> RemoveSensor(string json) {
             try {
                 return http.Delete("/api/sensor/remove", json);
             } catch {
@@ -90,9 +89,10 @@ namespace PlacePodApiClient.API_Methods {
         /// </summary>
         /// <param name="filter">JSON string with start/end date and optional fields</param>
         /// <returns>An array of sensor time objects</returns>
-        public Task<string> SensorHistory(string filter) {
+        public static async Task<List<SensorHistoryLog>> SensorHistory(string filter) {
             try {
-                return http.Post("/api/sensor/history", filter);
+                string sensorHistoryLogs = await http.Post("/api/sensor/history", filter);
+                return Factories.CreateCollection<SensorHistoryLog>(sensorHistoryLogs);
             } catch {
                 Console.WriteLine("Couldn't fetch sensor history");
                 throw;
@@ -105,7 +105,7 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/recalibrate'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public Task<string> Recalibrate(string json) {
+        public static Task<string> Recalibrate(string json) {
             try {
                 return http.Post("/api/sensor/recalibrate", json);
             } catch {
@@ -120,7 +120,7 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/initialize-bist'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public Task<string> InitializeBist(string json) {
+        public static Task<string> InitializeBist(string json) {
             try {
                 return http.Post("/api/sensor/initialize-bist", json);
             } catch {
@@ -136,9 +136,10 @@ namespace PlacePodApiClient.API_Methods {
         /// </summary>
         /// <param name="sensorId">Id of the sensor to look for a response from</param>
         /// <param name="now">Only return results after this ISO timestamp</param>
-        public Task<string> BistResponse(string sensorId, string now) {
+        public static async Task<List<BistResponse>> BistResponse(string sensorId, string now) {
             try {
-                return http.Get("/api/sensor/bist-response/" + sensorId + "/" + now);
+                string bistResponse = await http.Get("/api/sensor/bist-response/" + sensorId + "/" + now);
+                return Factories.CreateCollection<BistResponse>(bistResponse);
             } catch {
                 Console.WriteLine("Couldn't Fetch BIST results");
                 throw;
@@ -151,7 +152,7 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/ping'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public Task<string> InitializePing(string json) {
+        public static Task<string> InitializePing(string json) {
             try {
                 return http.Post("/api/sensor/ping", json);
             } catch {
@@ -167,9 +168,10 @@ namespace PlacePodApiClient.API_Methods {
         /// <param name="sensorId">Id of the sensor to look for a response from</param>
         /// <param name="now">Only return results after this ISO timestamp</param>
         /// <returns></returns>
-        public Task<string> PingResponse(string sensorId, string now) {
+        public static async Task<List<PingResponse>> PingResponse(string sensorId, string now) {
             try {
-                return http.Get("/api/sensor/ping-response/" + sensorId + "/" + now);
+                string pingResponse = await http.Get("/api/sensor/ping-response/" + sensorId + "/" + now);
+                return Factories.CreateCollection<PingResponse>(pingResponse);
             } catch {
                 Console.WriteLine("Couldn't Fetch Ping results");
                 throw;
@@ -182,10 +184,9 @@ namespace PlacePodApiClient.API_Methods {
             /// Route: '/api/sensor/force-vacant'
             /// </summary>
             /// <param name="json">JSON string</param>
-            public async Task<JArray> ForceVacant(string json) {
+            public static Task<string> ForceVacant(string json) {
             try {
-                dynamic result = await http.Post("/api/sensor/force-vacant", json);
-                return JsonConvert.DeserializeObject(result);
+                return http.Post("/api/sensor/force-vacant", json);
             } catch {
                 Console.WriteLine("Couldn't send force vacant request");
                 throw;
@@ -198,10 +199,9 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/force-occupied'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public async Task<JArray> ForceOccupied(string json) {
+        public static Task<string> ForceOccupied(string json) {
             try {
-                dynamic result = await http.Post("/api/sensor/force-occupied", json);
-                return JsonConvert.DeserializeObject(result);
+                return http.Post("/api/sensor/force-occupied", json);
             } catch {
                 Console.WriteLine("Couldn't send force occupied request");
                 throw;
@@ -214,10 +214,9 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/enable-transition-state-reporting'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public async Task<JArray> EnableTransitionStateReporting(string json) {
+        public static Task<string> EnableTransitionStateReporting(string json) {
             try {
-                dynamic result = await http.Post("/api/sensor/enable-transition-state-reporting", json);
-                return JsonConvert.DeserializeObject(result);
+                return http.Post("/api/sensor/enable-transition-state-reporting", json);
             } catch {
                 Console.WriteLine("Couldn't send enable transition state reporting request");
                 throw;
@@ -230,10 +229,9 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/disable-transition-state-reporting'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public async Task<JArray> DisableTransitionStateReporting(string json) {
+        public static Task<string> DisableTransitionStateReporting(string json) {
             try {
-                dynamic result = await http.Post("/api/sensor/disable-transition-state-reporting", json);
-                return JsonConvert.DeserializeObject(result);
+                return http.Post("/api/sensor/disable-transition-state-reporting", json);
             } catch {
                 Console.WriteLine("Couldn't send disable transition state reporting request");
                 throw;
@@ -246,10 +244,9 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/set-lora-wakeup-interval'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public async Task<JArray> SetLoraWakeupInterval(string json) {
+        public static Task<string> SetLoraWakeupInterval(string json) {
             try {
-                dynamic result = await http.Post("/api/sensor/set-lora-wakeup-interval", json);
-                return JsonConvert.DeserializeObject(result);
+                return http.Post("/api/sensor/set-lora-wakeup-interval", json);
             } catch {
                 Console.WriteLine("Couldn't send set wakeup interval request");
                 throw;
@@ -262,10 +259,9 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/set-lora-tx-power'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public async Task<JArray> SetLoraTxPower(string json) {
+        public static Task<string> SetLoraTxPower(string json) {
             try {
-                dynamic result = await http.Post("/api/sensor/set-lora-tx-power", json);
-                return JsonConvert.DeserializeObject(result);
+                return http.Post("/api/sensor/set-lora-tx-power", json);
             } catch {
                 Console.WriteLine("Couldn't send set Tx power request");
                 throw;
@@ -279,10 +275,9 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/set-tx-spreading-factor'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public async Task<JArray> SetTxSpreadingFactor(string json) {
+        public static Task<string> SetTxSpreadingFactor(string json) {
             try {
-                dynamic result = await http.Post("/api/sensor/set-tx-spreading-factor", json);
-                return JsonConvert.DeserializeObject(result);
+                return http.Post("/api/sensor/set-tx-spreading-factor", json);
             } catch {
                 Console.WriteLine("Couldn't send set Tx spread factor request");
                 throw;
@@ -296,10 +291,9 @@ namespace PlacePodApiClient.API_Methods {
         /// Route: '/api/sensor/set-frequency-sub-band'
         /// </summary>
         /// <param name="json">JSON string</param>
-        public async Task<JArray> SetFrequencySubBand(string json) {
+        public static Task<string> SetFrequencySubBand(string json) {
             try {
-                dynamic result = await http.Post("/api/sensor/set-frequency-sub-band", json);
-                return JsonConvert.DeserializeObject(result);
+                return http.Post("/api/sensor/set-frequency-sub-band", json);
             } catch {
                 Console.WriteLine("Couldn't send set Tx spread factor request");
                 throw;

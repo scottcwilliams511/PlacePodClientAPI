@@ -1,7 +1,10 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PlacePodApiClient.API_Methods;
+using PlacePodApiClient.Api;
+using PlacePodApiClient.Helpers;
+using PlacePodApiClient.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 
@@ -29,74 +32,64 @@ namespace PlacePodApiClient {
     /// You will also want to remove any test data left on your account due to the insert calls.
     /// This can be done on either the API's swagger page or through the Parking Cloud.
     /// </summary>
-    class FirstApp {
-
-        /// <summary>
-        /// Constructor. Call .Run next to run the application.
-        /// </summary>
-        public FirstApp() {
-            Console.WriteLine("This first sample application will test the get, insert, update, and remove functions" +
-                " of 'gateways', 'parking-lots', and sensors'.");
-        }
+    internal static class FirstApp {
 
         /// <summary>
         /// Start the first application
         /// </summary>
         /// <returns></returns>
-        public void Run() {
+        public static void Run() {
+            Console.WriteLine("This first sample application will test the get, insert, update, and remove functions" +
+                " of 'gateways', 'parking-lots', and sensors'.");
+
             Console.WriteLine("Run first sample application (y/n)? ");
             string input = Console.ReadLine();
-            if (input == "y" || input == "Y") {
-                Task.Run(async () => {
-
-                    // All of this is wrapped in a try/catch because if one operation fails it
-                    // can cause the rest of the first app to not behave as desired.
-                    try {
-                        await GetParkingLots();
-                        await GetSensors();
-                        await GetGateways();
-
-                        string lotId = await InsertParkingLot();
-                        await UpdateParkingLot(lotId);
-
-                        string sensorId = "abcd12340987fed0";
-                        await InsertSensor(sensorId, lotId);
-                        await UpdateSensor(sensorId);
-
-                        string gatewayId = await InsertGateway(lotId);
-                        await UpdateGateway(gatewayId);
-
-                        await RemoveGateway(gatewayId);
-                        await RemoveSensor(sensorId);
-                        await RemoveParkingLot(lotId);
-                    } catch (Exception ex) {
-                        Console.WriteLine("First sample application crashed. Error: " + ex.Message);
-                    }
-
-                    Console.WriteLine("Press any key to continue...");
-                    Console.ReadKey();
-                }).GetAwaiter().GetResult();
+            if (input != "y" && input != "Y") {
+                return;
             }
+            Task.Run(async () => {
+
+                // All of this is wrapped in a try/catch because if one operation fails it
+                // can cause the rest of the first app to not behave as desired.
+                try {
+                    await GetParkingLots();
+                    await GetSensors();
+                    await GetGateways();
+
+                    string lotId = await InsertParkingLot();
+                    await UpdateParkingLot(lotId);
+
+                    string sensorId = "abcd12340987fed0";
+                    await InsertSensor(sensorId, lotId);
+                    await UpdateSensor(sensorId);
+
+                    string gatewayId = await InsertGateway(lotId);
+                    await UpdateGateway(gatewayId);
+
+                    await RemoveGateway(gatewayId);
+                    await RemoveSensor(sensorId);
+                    await RemoveParkingLot(lotId);
+                } catch (Exception ex) {
+                    Console.WriteLine("First sample application crashed. Error: " + ex.Message);
+                }
+
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+            }).GetAwaiter().GetResult();
         }
-
-
-        private GatewayMethods gatewayMethods = new GatewayMethods();
-        private ParkingLotMethods parkingLotMethods = new ParkingLotMethods();
-        private SensorMethods sensorMethods = new SensorMethods();
 
 
         /// <summary>
         /// Fetch all of the parking lots and print them out
         /// </summary>
-        private async Task GetParkingLots() {
+        private static async Task GetParkingLots() {
             Console.WriteLine("Testing '/api/parking-lots'");
 
-            string result = await parkingLotMethods.GetParkingLots();
+            List<ParkingLot> parkingLots = await ParkingLotApi.GetParkingLots();
+            Console.WriteLine("Got " + parkingLots.Count + " Parking Lots:");
 
-            dynamic lots = JsonConvert.DeserializeObject(result);
-            Console.WriteLine("Got " + lots.Count + " Parking Lots: ");
-            foreach (var lot in lots) {
-                Console.WriteLine("--> " + lot.id + ": " + lot.name + " ");
+            foreach (ParkingLot parkingLot in parkingLots) {
+                Console.WriteLine("--> " + parkingLot.Id + ": " + parkingLot.Name);
             }
             Console.WriteLine();
         }
@@ -105,15 +98,14 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Fetch all of the sensors and print them out
         /// </summary>
-        private async Task GetSensors() {
+        private static async Task GetSensors() {
             Console.WriteLine("Testing '/api/sensors'");
 
-            string result = await sensorMethods.GetSensors("{}");
+            List<Sensor> sensors = await SensorApi.GetSensors("{}");
+            Console.WriteLine("Got " + sensors.Count + " Sensors:");
 
-            dynamic sensors = JsonConvert.DeserializeObject(result);
-            Console.WriteLine("Got " + sensors.Count + " Sensors");
-            foreach (var sensor in sensors) {
-                Console.WriteLine("--> " + sensor.sensorId + ": " + sensor.parkingSpace + ", " + sensor.status + ", " + sensor.parkingLot);
+            foreach (Sensor sensor in sensors) {
+                Console.WriteLine("--> " + sensor.SensorId + ": " + sensor.ParkingSpace + ", " + sensor.Status + ", " + sensor.ParkingLot);
             }
             Console.WriteLine();
         }
@@ -122,15 +114,14 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Fetch all of the gateways and print them out
         /// </summary>
-        private async Task GetGateways() {
+        private static async Task GetGateways() {
             Console.WriteLine("Testing '/api/gateways'");
 
-            string result = await gatewayMethods.GetGateways();
+            List<Gateway> gateways = await GatewayMethods.GetGateways();
+            Console.WriteLine("Got " + gateways.Count + " Gateways:");
 
-            dynamic gateways = JsonConvert.DeserializeObject(result);
-            Console.WriteLine("Got " + gateways.Count + " Gateways: ");
-            foreach (var gateway in gateways) {
-                Console.WriteLine("--> " + gateway.gatewayMac + ": " + gateway.name + " ");
+            foreach (Gateway gateway in gateways) {
+                Console.WriteLine("--> " + gateway.GatewayMac + ": " + gateway.Name);
             }
             Console.WriteLine();
         }
@@ -140,29 +131,32 @@ namespace PlacePodApiClient {
         /// Insert a new parking lot named "TEST: C#-api-lot-insert"
         /// </summary>
         /// <returns>New parking lot's Id</returns>
-        private async Task<string> InsertParkingLot() {
+        private static async Task<string> InsertParkingLot() {
             Console.WriteLine("Testing '/api/parking-lot/insert'");
+
+            const string parkingLotName = "TEST: C#-api-lot-insert";
 
             // Sample JSON to send
             JObject json = new JObject {
-                ["parkingLotName"] = "TEST: C#-api-lot-insert",
+                ["parkingLotName"] = parkingLotName,
                 ["description"] = "c# client test",
                 ["streetAddress"] = "123 here",
                 ["latitude"] = 33.810280507079874,
                 ["longitude"] = -117.9189795255661
             };
 
-            await parkingLotMethods.InsertParkingLot(json.ToString());
+            await ParkingLotApi.InsertParkingLot(json.ToString());
             Console.WriteLine("Parking Lot Insert Success");
 
             // Get the parkingLotId of the inserted lot
-            string result = await parkingLotMethods.GetParkingLots();
+            List<ParkingLot> parkingLots = await ParkingLotApi.GetParkingLots();
 
-            dynamic lots = JsonConvert.DeserializeObject(result);
+            // Ideally the PlacePod API will include the id in the response message at a later time
+            // so that we don't have to to a O(n) lookup...
             string parkingLotId = null;
-            foreach (var lot in lots) {
-                if (lot.name == "TEST: C#-api-lot-insert") {
-                    parkingLotId = lot.id;
+            foreach (ParkingLot parkingLot in parkingLots) {
+                if (parkingLot.Name == parkingLotName) {
+                    parkingLotId = parkingLot.Id;
                     break;
                 }
             }
@@ -175,7 +169,7 @@ namespace PlacePodApiClient {
         /// Update that new parking lot's name to "TEST: C#-api-lot-update"
         /// </summary>
         /// <param name="parkingLotId">Id of the new parking lot</param>
-        private async Task UpdateParkingLot(string parkingLotId) {
+        private static async Task UpdateParkingLot(string parkingLotId) {
             Console.WriteLine("Testing '/api/parking-lot/update'");
 
             // Sample JSON to send
@@ -184,8 +178,8 @@ namespace PlacePodApiClient {
                 ["parkingLotName"] = "TEST: C#-api-lot-update"
             };
 
-            await parkingLotMethods.UpdateParkingLot(json.ToString());
-            Console.WriteLine("Parking Lot Update Success" + "\n");
+            await ParkingLotApi.UpdateParkingLot(json.ToString());
+            Console.WriteLine("Parking Lot Update Success\n");
         }
 
 
@@ -194,7 +188,7 @@ namespace PlacePodApiClient {
         /// </summary>
         /// <param name="sensorId">The Id of the sensor to insert</param>
         /// <param name="parkingLotId">The Id of the parking lot inserted earlier</param>
-        private async Task InsertSensor(string sensorId, string parkingLotId) {
+        private static async Task InsertSensor(string sensorId, string parkingLotId) {
             Console.WriteLine("Testing '/api/sensor/insert'");
 
             // Sample JSON to send
@@ -208,8 +202,8 @@ namespace PlacePodApiClient {
                 ["longitude"] = -111
             };
 
-            await sensorMethods.InsertSensor(json.ToString());
-            Console.WriteLine("Sensor Insert Success" + "\n");
+            await SensorApi.InsertSensor(json.ToString());
+            Console.WriteLine("Sensor Insert Success\n");
         }
 
 
@@ -217,7 +211,7 @@ namespace PlacePodApiClient {
         /// Update that new sensor's name to "TEST: c#-api-sensor-update". Also update its location.
         /// </summary>
         /// <param name="sensorId">The Id of the inserted sensor</param>
-        private async Task UpdateSensor(string sensorId) {
+        private static async Task UpdateSensor(string sensorId) {
             Console.WriteLine("Testing '/api/sensor/update'");
 
             // Sample JSON to send
@@ -228,8 +222,8 @@ namespace PlacePodApiClient {
                 ["longitude"] = -117.9189795255661
             };
 
-            await sensorMethods.UpdateSensor(json.ToString());
-            Console.WriteLine("Sensor Update Success" + "\n");
+            await SensorApi.UpdateSensor(json.ToString());
+            Console.WriteLine("Sensor Update Success\n");
         }
 
 
@@ -238,27 +232,28 @@ namespace PlacePodApiClient {
         /// </summary>
         /// <param name="parkingLotId">The Id of the parking lot inserted earlier</param>
         /// <returns>New gateway's Id</returns>
-        private async Task<string> InsertGateway(string parkingLotId) {
+        private static async Task<string> InsertGateway(string parkingLotId) {
             Console.WriteLine("Testing '/api/gateway/insert'");
+
+            const string gatewayName = "TEST: C#-api-gateway-insert";
 
             // Sample JSON to send
             JObject json = new JObject {
                 ["gatewayMac"] = "cdef78904321dcb0",
-                ["gatewayName"] = "TEST: C#-api-gateway-insert",
+                ["gatewayName"] = gatewayName,
                 ["parkingLotId"] = parkingLotId
             };
 
-            await gatewayMethods.InsertGateway(json.ToString());
+            await GatewayMethods.InsertGateway(json.ToString());
             Console.WriteLine("Gateway Insert Success");
 
             // Get the gateway Id of the inserted gateway
-            string result = await gatewayMethods.GetGateways();
+            List<Gateway> gateways = await GatewayMethods.GetGateways();
 
-            dynamic gateways = JsonConvert.DeserializeObject(result);
             string gatewayId = null;
-            foreach (var gateway in gateways) {
-                if (gateway.name == "TEST: C#-api-gateway-insert") {
-                    gatewayId = gateway.id;
+            foreach (Gateway gateway in gateways) {
+                if (gateway.Name == gatewayName) {
+                    gatewayId = gateway.Id;
                     break;
                 }
             }
@@ -271,7 +266,7 @@ namespace PlacePodApiClient {
         /// Update that new gateway's name to "TEST: C#-api-gateway-update"
         /// </summary>
         /// <param name="gatewayId">The Id of the inserted gateway</param>
-        private async Task UpdateGateway(string gatewayId) {
+        private static async Task UpdateGateway(string gatewayId) {
             Console.WriteLine("Testing '/api/gateway/update'");
 
             // Sample JSON to send
@@ -280,8 +275,8 @@ namespace PlacePodApiClient {
                 ["gatewayName"] = "TEST: C#-api-gateway-update"
             };
             
-            await gatewayMethods.UpdateGateway(json.ToString());
-            Console.WriteLine("Gateway Update Success" + "\n");
+            await GatewayMethods.UpdateGateway(json.ToString());
+            Console.WriteLine("Gateway Update Success\n");
         }
 
 
@@ -289,7 +284,7 @@ namespace PlacePodApiClient {
         /// Remove that updated gateway
         /// </summary>
         /// <param name="gatewayId">The Id of the updated gateway</param>
-        private async Task RemoveGateway(string gatewayId) {
+        private static async Task RemoveGateway(string gatewayId) {
             Console.WriteLine("Testing '/api/gateway/remove'");
 
             // Sample JSON to send
@@ -297,8 +292,8 @@ namespace PlacePodApiClient {
                 ["id"] = gatewayId
             };
 
-            await gatewayMethods.RemoveGateway(json.ToString());
-            Console.WriteLine("Gateway Remove Success" + "\n");
+            await GatewayMethods.RemoveGateway(json.ToString());
+            Console.WriteLine("Gateway Remove Success\n");
         }
 
 
@@ -306,7 +301,7 @@ namespace PlacePodApiClient {
         /// Remove that updated sensor
         /// </summary>
         /// <param name="sensorId">The Id of the updated sensor</param>
-        private async Task RemoveSensor(string sensorId) {
+        private static async Task RemoveSensor(string sensorId) {
             Console.WriteLine("Testing '/api/sensor/remove'");
 
             // Sample JSON to send
@@ -314,8 +309,8 @@ namespace PlacePodApiClient {
                 ["sensorId"] = sensorId
             };
 
-            await sensorMethods.RemoveSensor(json.ToString());
-            Console.WriteLine("Sensor Remove Success" + "\n");
+            await SensorApi.RemoveSensor(json.ToString());
+            Console.WriteLine("Sensor Remove Success\n");
         }
 
 
@@ -323,7 +318,7 @@ namespace PlacePodApiClient {
         /// Remove that updated parking lot
         /// </summary>
         /// <param name="parkingLotId">The Id of the updated parking lot</param>
-        private async Task RemoveParkingLot(string parkingLotId) {
+        private static async Task RemoveParkingLot(string parkingLotId) {
             Console.WriteLine("Testing '/api/parking-lot/remove'");
 
             // Sample JSON to send
@@ -331,8 +326,8 @@ namespace PlacePodApiClient {
                 ["id"] = parkingLotId
             };
 
-            await parkingLotMethods.RemoveParkingLot(json.ToString());
-            Console.WriteLine("Parking Lot Remove Success" + "\n");
+            await ParkingLotApi.RemoveParkingLot(json.ToString());
+            Console.WriteLine("Parking Lot Remove Success\n");
         }
     }
 }

@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PlacePodApiClient.API_Methods;
+using PlacePodApiClient.Api;
+using PlacePodApiClient.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+
 
 namespace PlacePodApiClient {
 
@@ -33,78 +36,65 @@ namespace PlacePodApiClient {
     /// is suggested to not make rapid calls to the sensor and wait around a minute before 
     /// sending another call to the same sensor.
     /// </summary>
-    class SecondApp {
+    internal static class SecondApp {
 
         /// <summary>
         /// ISO date string of a time when your sensor was on
         /// </summary>
-        private readonly string startTime = "2017-12-08T01:00:00.000Z";
+        private static readonly string startTime = "2017-12-08T01:00:00.000Z";
 
 
         /// <summary>
         /// ISO date string of a later time when your sensor was on
         /// </summary>
-        private readonly string endTime = "2017-12-08T01:10:00.000Z";
-
-
-        /// <summary>
-        /// Constructor. Call .Run next to run the application.
-        /// </summary>
-        public SecondApp() {
-            Console.WriteLine("This second sample application will test the other 'sensor' operaions. " +
-                "A sensor ID must be provided to proceed.");
-        }
+        private static readonly string endTime = "2017-12-08T01:10:00.000Z";
 
 
         /// <summary>
         /// Start the second application
         /// </summary>
         /// <returns></returns>
-        public void Run() {
+        public static void Run() {
+            Console.WriteLine("This second sample application will test the other 'sensor' operaions. " +
+                "A sensor ID must be provided to proceed.");
+
             Console.WriteLine("Run second sample application (y/n)? ");
             string input = Console.ReadLine();
-            if (input == "y" || input == "Y") {
-
-                Console.WriteLine("Enter sensor ID: ");
-                sensorId = Console.ReadLine();
-
-                Task.Run(async () => {
-                    Console.WriteLine("Running operations using sensor: " + sensorId);
-
-                    await GetSensorHistoryCount();
-                    await SendRecalibrate();
-                    await FullBist();
-                    await FullPingTest();
-                    await ForceVacant();
-                    await ForceOccupied();
-                    await EnableTransitionStateReporting();
-                    await DisableTransitionStateReporting();
-                    await SetWakeupInterval();
-                    await SetTxPower();
-                    await SetSpreadFactor();
-                    await SetFrequencySubBand();
-
-                    Console.WriteLine("Press any key to continue...");
-                    Console.ReadKey();
-                }).GetAwaiter().GetResult();
-
+            if (input != "y" && input != "Y") {
+                return;
             }
-        }
 
+            Console.WriteLine("Enter sensor ID: ");
+            string sensorId = Console.ReadLine();
 
-        /// <summary>
-        /// Contains the API methods for a sensor
-        /// </summary>
-        private SensorMethods sensorMethods = new SensorMethods();
+            Task.Run(async () => {
+                Console.WriteLine("Running operations using sensor: " + sensorId);
 
-        private string sensorId;
+                await GetSensorHistoryCount(sensorId);
+                await SendRecalibrate(sensorId);
+                await FullBist(sensorId);
+                await FullPingTest(sensorId);
+                await ForceVacant(sensorId);
+                await ForceOccupied(sensorId);
+                await EnableTransitionStateReporting(sensorId);
+                await DisableTransitionStateReporting(sensorId);
+                await SetWakeupInterval(sensorId);
+                await SetTxPower(sensorId);
+                await SetSpreadFactor(sensorId);
+                await SetFrequencySubBand(sensorId);
+
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+            }).GetAwaiter().GetResult();
+        } 
+
 
         /// <summary>
         /// Fetch sensor history within the timespan and report the number of results.
         /// Check private variables 'startTime' and 'endTime' for the timespan
         /// and adjust these as needed!
         /// </summary>
-        private async Task GetSensorHistoryCount() {
+        private static async Task GetSensorHistoryCount(string sensorId) {
             Console.WriteLine("Test /api/sensor/history");
 
             Console.WriteLine("Get Sensor History (y/n)? ");
@@ -119,9 +109,8 @@ namespace PlacePodApiClient {
                 };
 
                 try {
-                    dynamic result = await sensorMethods.SensorHistory(json.ToString());
-                    JArray history = JsonConvert.DeserializeObject(result);
-                    Console.WriteLine("Number of results: " + history.Count + "\n");
+                    List<SensorHistoryLog> logs = await SensorApi.SensorHistory(json.ToString());
+                    Console.WriteLine("Number of results: " + logs.Count + "\n");
                 } catch (Exception ex) {
                     Console.WriteLine("Method Error: " + ex.Message + "\n");
                 }
@@ -133,7 +122,7 @@ namespace PlacePodApiClient {
         /// Send down a recalibrate request
         /// </summary>
         /// <returns></returns>
-        private async Task SendRecalibrate() {
+        private static async Task SendRecalibrate(string sensorId) {
             Console.WriteLine("Test /api/sensor/recalibrate");
 
             Console.WriteLine("Recalibrate sensor (y/n)? ");
@@ -148,7 +137,7 @@ namespace PlacePodApiClient {
                 try {
                     Console.WriteLine("Sending Recalibrate request...");
 
-                    await sensorMethods.Recalibrate(json.ToString());
+                    await SensorApi.Recalibrate(json.ToString());
 
                     Console.WriteLine("Recalibrate Sent" + "\n");
                 } catch (Exception ex) {
@@ -162,7 +151,7 @@ namespace PlacePodApiClient {
         /// for the sensor response every second over the course of 5 minutes.
         /// </summary>
         /// <returns></returns>
-        private async Task FullBist() {
+        private static async Task FullBist(string sensorId) {
             Console.WriteLine("Test /api/initialize-bist and /api/sensor/bist-response/{SensorId}/{LastUpdated}");
             Console.WriteLine("Run basic internal self test (BIST) (y/n)?");
             string input = Console.ReadLine();
@@ -176,28 +165,26 @@ namespace PlacePodApiClient {
                 try {
                     Console.WriteLine("Sending BIST request...");
 
-                    string now = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss");
-                    JArray result = null;
+                    string now = DateTime.Now.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
 
                     // Initialize the test
-                    await sensorMethods.InitializeBist(json.ToString());
+                    await SensorApi.InitializeBist(json.ToString());
 
-                    Console.WriteLine("BIST Sent", now);
+                    Console.WriteLine("BIST Sent at UTC: " + now);
+
+                    List<BistResponse> responses = new List<BistResponse>();
 
                     // We want to call the bist-response every second for 5 minutes
                     // or until a response comes back.
                     int timer = 0;
                     while (timer < 300) {
-                        dynamic rawResponse = await sensorMethods.BistResponse(sensorId, now);
-
-                        result = JsonConvert.DeserializeObject(rawResponse);
-                        if (result.ToString() != "[]") {
+                        responses = await SensorApi.BistResponse(sensorId, now);
+                        if (responses.Count > 0) {
                             break;
                         }
 
                         Console.WriteLine("Waiting for Bist response " + (++timer));
                         await Task.Delay(1000);
-                        now = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss");
                     }
 
                     if (timer >= 300) {
@@ -205,8 +192,8 @@ namespace PlacePodApiClient {
                     } else {
                         Console.WriteLine("BIST response recieved!");
 
-                        foreach (JToken i in result) {
-                            Console.WriteLine("--> " + i["sensorType"] + ": " + i["status"]);
+                        foreach (BistResponse response in responses) {
+                            Console.WriteLine("--> " + response.SensorType + ": " + response.Status);
                         }
                     }
 
@@ -222,7 +209,7 @@ namespace PlacePodApiClient {
         /// Send down a Ping request and wait up to 5 minutes for the response
         /// </summary>
         /// <returns></returns>
-        private async Task FullPingTest() {
+        private static async Task FullPingTest(string sensorId) {
             Console.WriteLine("Test /api/sensor/ping and /api/sensor/ping-response/{SensorId}/{LastUpdated}");
             Console.WriteLine("Ping sensor (y/n)?");
             string input = Console.ReadLine();
@@ -236,28 +223,26 @@ namespace PlacePodApiClient {
                 try {
                     Console.WriteLine("Sending Ping request...");
 
-                    string now = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss");
-                    JArray result = null;
+                    string now = DateTime.Now.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss");
 
                     // Send down the Ping request
-                    await sensorMethods.InitializePing(json.ToString());
+                    await SensorApi.InitializePing(json.ToString());
 
-                    Console.WriteLine("Ping Sent", now, result);
+                    Console.WriteLine("Ping Sent at UTC: " + now);
+
+                    List<PingResponse> responses = new List<PingResponse>();
 
                     // We want to call the ping-response every second for 5 minutes
                     // or until a response comes back.
                     int timer = 0;
                     while (timer < 300) {
-                        dynamic rawResponse = await sensorMethods.PingResponse(sensorId, now);
-
-                        result = JsonConvert.DeserializeObject(rawResponse);
-                        if (result.ToString() != "[]") {
+                        responses = await SensorApi.PingResponse(sensorId, now);
+                        if (responses.Count > 0) {
                             break;
                         }
 
                         Console.WriteLine("Waiting for Ping response " + (++timer));
                         await Task.Delay(1000);
-                        now = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss");
                     }
 
                     if (timer >= 300) {
@@ -265,9 +250,9 @@ namespace PlacePodApiClient {
                     } else {
                         Console.WriteLine("Ping response recieved!");
 
-                        foreach (JToken i in result) {
-                            Console.WriteLine("--> Ping RSSI: " + i["pingRssi"] + ", Ping SNR: " 
-                                + i["pingSNR"] + ". Server time: " + i["serverTime"]);
+                        foreach (PingResponse response in responses) {
+                            Console.WriteLine("--> Ping RSSI: " + response.PingRssi + ", Ping SNR: " 
+                                + response.PingSNR + ". Server time: " + response.ServerTime);
                         }
                     }
 
@@ -282,7 +267,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Force the sensor's Car Presence to say vacant
         /// </summary>
-        private async Task ForceVacant() {
+        private static async Task ForceVacant(string sensorId) {
             Console.WriteLine("Test /api/sensor/force-vacant");
             Console.WriteLine("Force car presence to vacant (y/n)?");
             string input = Console.ReadLine();
@@ -296,7 +281,7 @@ namespace PlacePodApiClient {
                 try {
                     Console.WriteLine("Sending Force Vacant...");
 
-                    await sensorMethods.ForceVacant(json.ToString());
+                    await SensorApi.ForceVacant(json.ToString());
 
                     Console.WriteLine("Force Vacant Sent" + "\n");
                 } catch (Exception ex) {
@@ -309,7 +294,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Force the sensor's Car Presence to say occcupied
         /// </summary>
-        private async Task ForceOccupied() {
+        private static async Task ForceOccupied(string sensorId) {
             Console.WriteLine("Test /api/sensor/force-occupied");
             Console.WriteLine("Force car presence to occupied (y/n)?");
             string input = Console.ReadLine();
@@ -323,7 +308,7 @@ namespace PlacePodApiClient {
                 try {
                     Console.WriteLine("Sending Force Occupied...");
 
-                    await sensorMethods.ForceOccupied(json.ToString());
+                    await SensorApi.ForceOccupied(json.ToString());
 
                     Console.WriteLine("Force Occupied Sent" + "\n");
                 } catch (Exception ex) {
@@ -336,7 +321,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Enables transition state reporting for the sensor
         /// </summary>
-        private async Task EnableTransitionStateReporting() {
+        private static async Task EnableTransitionStateReporting(string sensorId) {
             Console.WriteLine("Test /api/sensor/enable-transition-state-reporting");
             Console.WriteLine("Enable transition state reporting (y/n)?");
             string input = Console.ReadLine();
@@ -350,7 +335,7 @@ namespace PlacePodApiClient {
                 try {
                     Console.WriteLine("Sending enable transition state reporting...");
 
-                    await sensorMethods.EnableTransitionStateReporting(json.ToString());
+                    await SensorApi.EnableTransitionStateReporting(json.ToString());
 
                     Console.WriteLine("Enable transition state reporting Sent" + "\n");
                 } catch (Exception ex) {
@@ -364,7 +349,7 @@ namespace PlacePodApiClient {
         /// Disables transition state reporting for the sensor
         /// </summary>
         /// <returns></returns>
-        private async Task DisableTransitionStateReporting() {
+        private static async Task DisableTransitionStateReporting(string sensorId) {
             Console.WriteLine("Test /api/sensor/disable-transition-state-reporting");
             Console.WriteLine("Disable transition state reporting (y/n)?");
             string input = Console.ReadLine();
@@ -378,7 +363,7 @@ namespace PlacePodApiClient {
                 try {
                     Console.WriteLine("Sending disable transition state reporting...");
 
-                    await sensorMethods.DisableTransitionStateReporting(json.ToString());
+                    await SensorApi.DisableTransitionStateReporting(json.ToString());
 
                     Console.WriteLine("Disable transition state reporting Sent" + "\n");
                 } catch (Exception ex) {
@@ -391,7 +376,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Sets the sensor's wakeup interval to every 5 minutes.
         /// </summary>
-        private async Task SetWakeupInterval() {
+        private static async Task SetWakeupInterval(string sensorId) {
             Console.WriteLine("Test /api/sensor/set-lora-wakeup-interval");
             Console.WriteLine("Set LoRa wakeup interval to 5 minutes (y/n)?");
             string input = Console.ReadLine();
@@ -406,7 +391,7 @@ namespace PlacePodApiClient {
 
                     Console.WriteLine("Sending set LoRa wakeup interval...");
 
-                    await sensorMethods.SetLoraWakeupInterval(json.ToString());
+                    await SensorApi.SetLoraWakeupInterval(json.ToString());
 
                     Console.WriteLine("Set LoRa wakeup interval Sent" + "\n");
                 } catch (Exception ex) {
@@ -419,7 +404,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// This will set the sensor's LoRa Tx power to ll dBs.
         /// </summary>
-        private async Task SetTxPower() {
+        private static async Task SetTxPower(string sensorId) {
             Console.WriteLine("Test /api/sensor/set-lora-tx-power");
             Console.WriteLine("Set LoRa Tx Power to 11 (y/n)?");
             string input = Console.ReadLine();
@@ -434,7 +419,7 @@ namespace PlacePodApiClient {
 
                     Console.WriteLine("Sending set LoRa Tx Power...");
 
-                    await sensorMethods.SetLoraTxPower(json.ToString());
+                    await SensorApi.SetLoraTxPower(json.ToString());
 
                     Console.WriteLine("Set LoRa Tx Power sent" + "\n");
                 } catch (Exception ex) {
@@ -447,7 +432,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Change the sensor's spread factor to 7, BW 125 kHz
         /// </summary>
-        private async Task SetSpreadFactor() {
+        private static async Task SetSpreadFactor(string sensorId) {
             Console.WriteLine("Test /api/sensor/set-tx-spreading-factor");
             Console.WriteLine("Set Tx Spread Factor to SF 7, BW 125 kHz (y/n)?");
             string input = Console.ReadLine();
@@ -462,7 +447,7 @@ namespace PlacePodApiClient {
 
                     Console.WriteLine("Sending set Tx spreading factor...");
 
-                    await sensorMethods.SetTxSpreadingFactor(json.ToString());
+                    await SensorApi.SetTxSpreadingFactor(json.ToString());
 
                     Console.WriteLine("Set Tx spreading factor sent" + "\n");
                 } catch (Exception ex) {
@@ -475,7 +460,7 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Set sensor's frequency sub band to 902.3 kHz - 903.7 kHz - 125k"
         /// </summary>
-        private async Task SetFrequencySubBand() {
+        private static async Task SetFrequencySubBand(string sensorId) {
             Console.WriteLine("Test /api/sensor/set-frequency-sub-band");
             Console.WriteLine("Set Frequency sub band to 902.3 kHz - 903.7 kHz - 125k");
             string input = Console.ReadLine();
@@ -490,7 +475,7 @@ namespace PlacePodApiClient {
 
                     Console.WriteLine("Sending set requency Sub Band...");
 
-                    await sensorMethods.SetFrequencySubBand(json.ToString());
+                    await SensorApi.SetFrequencySubBand(json.ToString());
 
                     Console.WriteLine("Set frequency sub band sent" + "\n");
                 } catch (Exception ex) {
