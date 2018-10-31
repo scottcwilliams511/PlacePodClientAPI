@@ -146,7 +146,11 @@ namespace Http_Async {
                                 throw new Exception(message);
                             }
                         }
-                        return responseMsg;
+                        try {
+                            return JsonConvert.DeserializeObject(responseMsg).ToString();
+                        } catch {
+                            return responseMsg;
+                        }
                     }
                 }
             } catch {
