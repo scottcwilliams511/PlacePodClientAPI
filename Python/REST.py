@@ -235,12 +235,10 @@ def getInsertUpdateRemoveTests():
 #   4) Send a Ping and wait for response (up to 5 minutes)                           #
 #   5) Send a force vacant                                                           #
 #   6) Send a force occupied                                                         #
-#   7) Send an enable transition state reporting                                     #
-#   8) Sen a disable transition state reporting                                      #
-#   9) Send a set lora wakeup interval to 5 minutes                                  #
-#  10) Send a set loRa Tx power call to 11dB                                         #
-#  11) Send a Tx spreading factor call to SF 7, BW 125 kHz                           #
-#  12) Send a set frequency sub band call to 902.3 kHz  - 903.7 kHz - 125k           #
+#   7) Send a set lora wakeup interval to 5 minutes                                  #
+#   8) Send a set loRa Tx power call to 11dB                                         #
+#   9) Send a Tx spreading factor call to SF 7, BW 125 kHz                           #
+#  10) Send a set frequency sub band call to 902.3 kHz  - 903.7 kHz - 125k           #
 #                                                                                    #
 # NOTE: There are only so many requests that can be queued by a sensor at a time,    #
 # so it is suggested to not make rapid calls to the sensor and wait around a minute  #
@@ -309,21 +307,6 @@ def sensorOperations(sensorId):
         # Test '/api/sensor/force-occupied'
         forceOccupied(params)
         wait()
-
-#--- Enable Transition State Reporting ---
-    userInput = input("Enable Transition State Reporting (y/n)? ")
-    if userInput == "y" or userInput == "Y":
-        # Test '/api/sensor/enable-transition-state-reporting'
-        enableTransitionStateReporting(params)
-        wait()
-
-#--- Disable transition state reporting ---
-    userInput = input("Disable Transition State Reporting (y/n)? ")
-    if userInput == "y" or userInput == "Y":
-        # Test '/api/sensor/disable-transition-state-reporting'
-        disableTransitionStateReporting(params)
-        wait()
-
 
 #--- Set LoRa Wakeup Interval ---
     userInput = input("Set LoRa Wakeup Interval to 5 minutes (y/n)?" )
@@ -621,7 +604,7 @@ def bist(params, sensorId):
         result = result.decode('utf_8')
 
         # If we get a valid result, exit the loop
-        if result != '[]':
+        if result != '"[]"' and result != "[]":
             break
 
         timer += 1
@@ -635,6 +618,9 @@ def bist(params, sensorId):
 
     print("BIST response recieved!")
     payload = json.loads(result)
+    if type(payload) is str:
+        payload = json.loads(payload)
+
     print(payload)
     for i in range(0, len(payload)):
         print("--> " + payload[i]["sensorType"] + ": " + payload[i]["status"])
@@ -670,7 +656,7 @@ def ping(params, sensorId):
         result = result.decode('utf_8')
 
         # If we get a valid result, exit the loop
-        if result != '[]':
+        if result != '"[]"' and result != "[]":
             break
 
         timer += 1
@@ -684,6 +670,9 @@ def ping(params, sensorId):
 
     print("Ping response recieved!")
     payload = json.loads(result)
+    if type(payload) is str:
+        payload = json.loads(payload)
+
     print(payload)
     for i in range(0, len(payload)):
         print("--> Ping RSSI: " + str(payload[i]["pingRssi"]) + ", Ping SNR: " + str(payload[i]["pingSNR"])
@@ -692,10 +681,6 @@ def ping(params, sensorId):
 #---end ping
 
 #--- Force Vacant ---
-# Note: The following api calls are all implemented the same as force vacant, just changing out the api route
-#  1) /api/sensor/force-occupied
-#  2) /api/sensor/enable-transition-state-reporting
-#  3) /api/sensor/disable-transition-state-reporting
 def forceVacant(params):
     print("Sending Force Vacant...")
     # Make the post call
@@ -715,26 +700,6 @@ def forceOccupied(params):
         return
     print("Force Occupied Sent")
 #---end forceOccupied
-
-#--- Enable Transition State Reporting ---
-def enableTransitionStateReporting(params):
-    print("Sending Enable Transition State Reporting...")
-    # Make the post call
-    result = post("/api/sensor/enable-transition-state-reporting", params)
-    if result == "Exiting...":
-        return
-    print("Enable Transition State Reporting Sent")
-#---end enableTransitionStateReporting
-
-#--- Disable Transition State Reporting ---
-def disableTransitionStateReporting(params):
-    print("Sending Disable Transition State Reporting...")
-    # Make the post call
-    result = post('/api/sensor/disable-transition-state-reporting', params)
-    if result == "Exiting":
-        return
-    print("Disable Transition State Reporting Send")
-#---end disableTransitionStateReporting
 
 #--- Set LoRa Wakeup Interval ---
 #  1)
@@ -869,15 +834,14 @@ def createGatewayPayload(dct):
 
 # Api value fields for a parking lot as an object
 class ParkingLot(object):
-    def __init__(self, id, name, cameraId):
+    def __init__(self, id, name):
         self.id = id
         self.name = name
-        self.cameraId = cameraId
 #---end ParkingLot
 
 # Create a ParkingLot object using the dictionary grabbed from the JSON
 def createParkingLotPayload(dct):
-    return ParkingLot(dct['id'], dct['name'], dct['cameraId'])
+    return ParkingLot(dct['id'], dct['name'])
 #---end createParkingLotPayload
 
 # Api value fields for a sensor as an object
