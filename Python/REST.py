@@ -11,7 +11,7 @@
 # below class objects. Program may crash otherwise. #
 #-------------------------------------------------- #
 
-from datetime import datetime
+import datetime
 import time
 
 # Used to make get requests to the api
@@ -598,8 +598,7 @@ def bist(params, sensorId):
     print("Sending BIST...")
 
     # Gross way to get current time in the desired format
-    d = datetime.now()
-    timeStr = str(d).replace(" ", "T").split(".")[0]
+    timeStr = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
 
     # Make the post call
     result = post("/api/sensor/initialize-bist", params)
@@ -629,10 +628,6 @@ def bist(params, sensorId):
         print("Waiting for Bist Response " + str(timer))
         time.sleep(1)
 
-        # Re-get the current time
-        d = datetime.now()
-        timeStr = str(d).replace(" ", "T").split(".")[0]
-
     # If we are outside the loop because of the timer, we didn't get a result
     if timer >= 300:
         print("No response...")
@@ -652,8 +647,7 @@ def ping(params, sensorId):
     print("Sending Ping...")
 
     # Gross way to get current time in the desired format
-    d = datetime.now()
-    timeStr = str(d).replace(" ", "T").split(".")[0]
+    timeStr = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).isoformat()
 
     # Make the post call
     result = post("/api/sensor/ping", params)
@@ -682,10 +676,6 @@ def ping(params, sensorId):
         timer += 1
         print("Waiting for Ping Response " + str(timer))
         time.sleep(1)
-
-        # Re-get the current time
-        d = datetime.now()
-        timeStr = str(d).replace(" ", "T").split(".")[0]
 
     # If we are outside the loop because of the timer, we didn't get a result
     if timer >= 300:
