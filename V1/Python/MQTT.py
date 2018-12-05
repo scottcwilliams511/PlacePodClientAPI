@@ -30,7 +30,7 @@ import json
 # For serverURL, don't include "mqtts://" or ":8883", otherwise the connection will not work
 
 
-serverURL = ""
+serverURL = "api.pnicloud.com"
 username = ""
 password = ""
 

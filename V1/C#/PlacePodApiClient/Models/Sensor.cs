@@ -101,7 +101,7 @@ namespace PlacePodApiClient.Models {
         /// Time from Sentral coprocessor in ticks.
         /// </summary>
         [JsonProperty("sentralTime")]
-        public double SentralTime { get; set; }
+        public double? SentralTime { get; set; }
 
         /// <summary>
         /// Sensor's current RSSI (received signal strength indication) status.

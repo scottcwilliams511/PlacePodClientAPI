@@ -8,8 +8,8 @@ namespace PlacePodApiClient {
     /// Sample PlacePod Client Application. This contains two sub applications to test API features.
     /// More information can be found in files "FirstApp.cs" and "SecondApp.cs"
     /// 
-    /// Implemented using Placepod API V1.1
-    /// Last updated: March 8th, 2018
+    /// Implemented using Placepod API V1
+    /// Last updated: December 4th, 2018
     /// 
     /// The placepod API is undocumented and subject to change
     /// Fully documented API comming soon!
@@ -26,7 +26,7 @@ namespace PlacePodApiClient {
          *    2) click on settings > REST API 
          *    3) Click GENERATE API KEY 
          *    4) Copy the API URL and the API key into the below values.  */
-        public static readonly string API_SERVER = "";
+        public static readonly string API_SERVER = "https://api.pnicloud.com";
         public static readonly string API_KEY = "";
 
         /// <summary>

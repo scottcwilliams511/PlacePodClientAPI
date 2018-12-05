@@ -3,28 +3,27 @@
 # File: REST.py                                     #
 # Author: Scott Williams swilliams@pnicorp.com      #
 # Date: June 8th, 2017                              #
-# Last updated: October 26th, 2017                  #
+# Last updated: December 4th, 2018                  #
 # Developed in: PyCharm Community Edition 2016.3.2  #
 # Project interpreter: 3.5.0                        #
 # Tests the Rest Web API for PlacePod. This program #
 # assumes that the gotten data will conform to the  #
 # below class objects. Program may crash otherwise. #
+#                                                   #
+# This script only works with V1 of the API.        #
 #-------------------------------------------------- #
 
 import datetime
 import time
+import requests # Used to make get requests to the api
+import json # Used to deserialize JSON obtained from the get call
 
-# Used to make get requests to the api
-import requests
-
-# Used to deserialize JSON obtained from the get call
-import json
 
 # To get these values: 1) Login to PNI cloud account at https://parking.pnicloud.com
 #                      2) Click on settings > REST API
-#                      3) Click "Re-Generate API Key"
+#                      3) Click "Generate API Key"
 #                      4) Copy the API URL and the API Key into the below values
-API_SERVER = ""
+API_SERVER = "https://api.pnicloud.com"
 API_KEY = ""
 
 
@@ -41,7 +40,6 @@ def main():
     if userInput == 'y' or userInput == 'Y':
         sensorId = input("Enter sensor ID: ")
         sensorOperations(sensorId)
-#---end main
 
 
 #--------------------------------First Sample Application----------------------------#
