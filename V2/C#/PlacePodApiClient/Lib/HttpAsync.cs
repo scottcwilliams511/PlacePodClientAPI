@@ -117,11 +117,15 @@ namespace PlacePodApiClient.Lib {
                             string message = "";
 
                             // Try to make the error message more readable if possible.
-                            dynamic errorJson = JsonConvert.DeserializeObject(responseMsg);
-                            message = (errorJson.Code != null && errorJson.Message != null)
-                                ? $"\"HTTP ERROR {status} \" - \" {errorJson.Code}: {errorJson.Message}"
-                                : $"\"HTTP ERROR {status} \" - \" {responseMsg}";
-    
+                            if (!string.IsNullOrWhiteSpace(responseMsg)) {
+                                dynamic errorJson = JsonConvert.DeserializeObject(responseMsg);
+                                message = (errorJson.Code != null && errorJson.Message != null)
+                                    ? $"\"HTTP ERROR {status} \" - \" {errorJson.Code}: {errorJson.Message}"
+                                    : $"\"HTTP ERROR {status} \" - \" {responseMsg}";
+                            } else {
+                                message = $"\"HTTP ERROR {status} \" - \" {response.ReasonPhrase}";
+                            }
+
                             throw new Exception(message);
                         }
                         return JsonConvert.DeserializeObject(responseMsg).ToString();

@@ -13,10 +13,9 @@ namespace PlacePodApiClient.Api {
         public SensorLogApi(IHttpAsync http) : base(http, "/sensorlogs") { }
 
 
-        public async Task<ICollection<SensorLog>> GetSensorLogs(string start, string end, string id = null) {
+        public async Task<ICollection<SensorLog>> GetSensorLogs(string start, string end) {
             try {
-                string idPath = (string.IsNullOrWhiteSpace(id)) ? "" : $"{id}/";
-                string response = await Http.Get($"{Route}/{idPath}{start}/{end}");
+                string response = await Http.Get($"{Route}/{start}/{end}");
 
                 try {
                     return JsonConvert.DeserializeObject<ICollection<SensorLog>>(response);

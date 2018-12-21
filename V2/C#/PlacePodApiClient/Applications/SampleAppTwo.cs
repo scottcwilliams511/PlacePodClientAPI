@@ -110,10 +110,16 @@ namespace PlacePodApiClient.Applications {
 
         private async Task GetSensorLogs(string start, string end, string id = null) {
             try {
-                string idPath = (string.IsNullOrWhiteSpace(id)) ? "" : $"{id}/";
-                WriteLine($"Testing GET \"{Route}{SensorLogs.Route}/{idPath}{start}/{end}\"");
 
-                ICollection<SensorLog> sensorLogs = await SensorLogs.GetSensorLogs(start, end, id);
+                ICollection<SensorLog> sensorLogs;
+                if (id == null) {
+                    WriteLine($"Testing GET \"{Route}{SensorLogs.Route}/{start}/{end}\"");
+                    sensorLogs = await SensorLogs.GetSensorLogs(start, end);
+                } else {
+                    WriteLine($"Testing GET \"{Route}{Sensors.Route}/{id}{SensorLogs.Route}/{start}/{end}\"");
+                    sensorLogs = await Sensors.GetSensorLogs(start, end, id);
+                }
+                
                 WriteLine($"Got {sensorLogs.Count} Sensor Logs:");
                 foreach (SensorLog sensorLog in sensorLogs) {
                     WriteLine(sensorLog.GetPrintString());
