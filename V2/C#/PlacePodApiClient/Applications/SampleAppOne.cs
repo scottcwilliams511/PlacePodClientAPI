@@ -9,7 +9,6 @@ using PlacePodApiClient.Models;
 using static System.Console;
 
 namespace PlacePodApiClient.Applications {
-
     /// <summary>
     /// This application tests the Get, Create, Update, and Delete methods of
     /// "driveways", "sensors", and "parkinglots". Tasks are performed in this order:
@@ -40,20 +39,20 @@ namespace PlacePodApiClient.Applications {
     /// </summary>
     public class SampleAppOne {
 
-        private readonly DrivewayApi Driveways;
+        private readonly DrivewayApi _drivewayApi;
 
-        private readonly ParkingLotApi ParkingLots;
+        private readonly ParkingLotApi _parkingLotApi;
 
-        private readonly SensorApi Sensors;
+        private readonly SensorApi _sensorApi;
 
-        private readonly string Route;
+        private readonly string _route;
 
 
         public SampleAppOne(IHttpAsync http) {
-            Driveways = new DrivewayApi(http);
-            ParkingLots = new ParkingLotApi(http);
-            Sensors = new SensorApi(http);
-            Route = http.BaseRoute;
+            _drivewayApi = new DrivewayApi(http);
+            _parkingLotApi = new ParkingLotApi(http);
+            _sensorApi = new SensorApi(http);
+            _route = http.BaseRoute;
         }
 
 
@@ -100,9 +99,9 @@ namespace PlacePodApiClient.Applications {
 
 
         private async Task GetParkingLots() {
-            WriteLine($"Testing GET \"{Route}{ParkingLots.Route}\"");
+            WriteLine($"Testing GET '{_route}/{ParkingLotApi.Path}'.");
 
-            ICollection<ParkingLot> parkingLots = await ParkingLots.Get<ParkingLot>();
+            ICollection<ParkingLot> parkingLots = await _parkingLotApi.Get<ParkingLot>();
             WriteLine($"Got {parkingLots.Count} Parking Lots:");
             foreach (ParkingLot parkingLot in parkingLots) {
                 WriteLine(parkingLot.GetPrintString());
@@ -112,9 +111,9 @@ namespace PlacePodApiClient.Applications {
 
 
         private async Task GetDriveways() {
-            WriteLine($"Testing GET \"{Route}{Driveways.Route}\"");
+            WriteLine($"Testing GET '{_route}/{DrivewayApi.Path}'.");
 
-            ICollection<Driveway> driveways = await Driveways.Get<Driveway>();
+            ICollection<Driveway> driveways = await _drivewayApi.Get<Driveway>();
             WriteLine($"Got {driveways.Count} Driveways:");
             foreach (Driveway driveway in driveways) {
                 WriteLine(driveway.GetPrintString());
@@ -124,9 +123,9 @@ namespace PlacePodApiClient.Applications {
 
 
         private async Task GetSensors() {
-            WriteLine($"Testing GET \"{Route}{Sensors.Route}\"");
+            WriteLine($"Testing GET '{_route}/{SensorApi.Path}'.");
 
-            ICollection<Sensor> sensors = await Sensors.Get<Sensor>();
+            ICollection<Sensor> sensors = await _sensorApi.Get<Sensor>();
             WriteLine($"Got {sensors.Count} Sensors:");
             foreach (Sensor sensor in sensors) {
                 WriteLine(sensor.GetPrintString());
@@ -136,7 +135,7 @@ namespace PlacePodApiClient.Applications {
 
 
         private async Task<string> CreateParkingLot() {
-            WriteLine($"Testing POST \"{Route}{ParkingLots.Route}\"");
+            WriteLine($"Testing POST '{_route}/{ParkingLotApi.Path}'.");
 
             const string parkingLotName = "TEST: C#-api-lot-create";
 
@@ -149,7 +148,7 @@ namespace PlacePodApiClient.Applications {
                 ["longitude"] = -117.9189795255661
             };
 
-            string result = await ParkingLots.Create(json.ToString());
+            string result = await _parkingLotApi.Create(json.ToString());
             WriteLine("Parking Lot Creation Success\n");
 
             return JObject.Parse(result)["id"].ToString();
@@ -157,7 +156,7 @@ namespace PlacePodApiClient.Applications {
 
 
         private async Task<string> CreateSensor(string sensorId, string parkingLotId) {
-            WriteLine($"Testing POST \"{Route}{Sensors.Route}\"");
+            WriteLine($"Testing POST '{_route}/{SensorApi.Path}'.");
 
             // Sample JSON to send
             JObject json = new JObject {
@@ -172,7 +171,7 @@ namespace PlacePodApiClient.Applications {
                 ["longitude"] = -111
             };
 
-            string result = await Sensors.Create(json.ToString());
+            string result = await _sensorApi.Create(json.ToString());
             WriteLine("Sensor Creation Success\n");
 
             return JObject.Parse(result)["id"].ToString();
@@ -180,7 +179,7 @@ namespace PlacePodApiClient.Applications {
 
 
         private async Task<string> CreateDriveway(string frontId, string backId, string parkingLotId) {
-            WriteLine($"Testing POST \"{Route}{Driveways.Route}\"");
+            WriteLine($"Testing POST '{_route}/{DrivewayApi.Path}'.");
 
             JObject json = new JObject {
                 ["name"] = "TEST: c#-api-driveway-create",
@@ -190,7 +189,7 @@ namespace PlacePodApiClient.Applications {
                 ["isDirectionIn"] = true,
             };
 
-            string result = await Driveways.Create(json.ToString());
+            string result = await _drivewayApi.Create(json.ToString());
             WriteLine("Driveway Creation Success\n");
 
             return JObject.Parse(result)["id"].ToString();
@@ -198,17 +197,17 @@ namespace PlacePodApiClient.Applications {
 
 
         private async Task GetMethods(string parkingLotId, string frontId, string backId, string drivewayId) {
-            WriteLine($"Testing GET \"{Route}{ParkingLots.Route}/{parkingLotId}");
-            ParkingLot parkingLot = await ParkingLots.Get<ParkingLot>(parkingLotId);
+            WriteLine($"Testing GET '{_route}/{ParkingLotApi.Path}/{parkingLotId}'.");
+            ParkingLot parkingLot = await _parkingLotApi.Get<ParkingLot>(parkingLotId);
 
-            WriteLine($"Testing GET \"{Route}{Sensors.Route}/{frontId}");
-            Sensor frontSensor = await Sensors.Get<Sensor>(frontId);
+            WriteLine($"Testing GET '{_route}/{SensorApi.Path}/{frontId}'.");
+            Sensor frontSensor = await _sensorApi.Get<Sensor>(frontId);
 
-            WriteLine($"Testing GET \"{Route}{Sensors.Route}/{backId}");
-            Sensor backSensor = await Sensors.Get<Sensor>(backId);
+            WriteLine($"Testing GET '{_route}/{SensorApi.Path}/{backId}'.");
+            Sensor backSensor = await _sensorApi.Get<Sensor>(backId);
 
-            WriteLine($"Testing GET \"{Route}{Driveways.Route}/{drivewayId}");
-            Driveway driveway = await Driveways.Get<Driveway>(drivewayId);
+            WriteLine($"Testing GET '{_route}/{DrivewayApi.Path}/{drivewayId}'.");
+            Driveway driveway = await _drivewayApi.Get<Driveway>(drivewayId);
 
             WriteLine("Objects that were just created:");
             WriteLine($"--> Parking Lot  {parkingLot.GetPrintString()}");
@@ -220,18 +219,18 @@ namespace PlacePodApiClient.Applications {
 
 
         private async Task ParkingLotGetMethods(string id) {
-            WriteLine($"Testing GET \"{Route}{ParkingLots.Route}/{id}/sensors\"");
+            WriteLine($"Testing GET '{_route}/{ParkingLotApi.Path}/{id}/{SensorApi.Path}'.");
 
-            ICollection<Sensor> sensors = await ParkingLots.GetSensors(id);
+            ICollection<Sensor> sensors = await _parkingLotApi.GetSensors(id);
             WriteLine($"Got {sensors.Count} Sensors:");
             foreach (Sensor sensor in sensors) {
                 WriteLine(sensor.GetPrintString());
             }
             WriteLine();
 
-            WriteLine($"Testing GET \"{Route}{ParkingLots.Route}/{id}/driveways\"");
+            WriteLine($"Testing GET '{_route}/{ParkingLotApi.Path}/{id}/{DrivewayApi.Path}'.");
 
-            ICollection<Driveway> driveways = await ParkingLots.GetDriveways(id);
+            ICollection<Driveway> driveways = await _parkingLotApi.GetDriveways(id);
             WriteLine($"Got {driveways.Count} Driveways:");
             foreach (Driveway driveway in driveways) {
                 WriteLine(driveway.GetPrintString());
@@ -241,20 +240,20 @@ namespace PlacePodApiClient.Applications {
 
 
         private async Task UpdateParkingLot(string id) {
-            WriteLine($"Testing PUT \"{Route}{Sensors.Route}/{id}\"");
+            WriteLine($"Testing PUT '{_route}/{SensorApi.Path}/{id}'.");
 
             // Sample JSON to send
             JObject json = new JObject {
                 ["name"] = "TEST: C#-api-lot-update"
             };
 
-            await ParkingLots.Update(id, json.ToString());
+            await _parkingLotApi.Update(id, json.ToString());
             WriteLine("Parking Lot Update Success\n");
         }
 
 
         private async Task UpdateSensor(string id) {
-            WriteLine($"Testing PUT \"{Route}{Sensors.Route}/{id}\"");
+            WriteLine($"Testing PUT '{_route}/{SensorApi.Path}/{id}'.");
 
             // Sample JSON to send
             JObject json = new JObject {
@@ -263,49 +262,49 @@ namespace PlacePodApiClient.Applications {
                 ["longitude"] = -117.9189795255661
             };
 
-            await Sensors.Update(id, json.ToString());
+            await _sensorApi.Update(id, json.ToString());
             WriteLine("Sensor Update Success\n");
         }
 
 
         private async Task UpdateDriveway(string id) {
-            WriteLine($"Testing PUT \"{Route}{Driveways.Route}/{id}\"");
+            WriteLine($"Testing PUT '{_route}/{DrivewayApi.Path}/{id}'.");
 
             // Sample JSON to send
             JObject json = new JObject {
                 ["name"] = "TEST: c#-api-driveway-update"
             };
 
-            await Driveways.Update(id, json.ToString());
+            await _drivewayApi.Update(id, json.ToString());
             WriteLine("Driveway Update Success\n");
         }
 
 
         private async Task DeleteSensor(string id) {
-            WriteLine($"Testing DELETE \"{Route}{Sensors.Route}/{id}\"");
+            WriteLine($"Testing DELETE '{_route}/{SensorApi.Path}/{id}'.");
 
             // Sample JSON to send
             JObject json = new JObject {
                 ["willUnprovision"] = true
             };
 
-            await Sensors.Delete(id, json.ToString());
+            await _sensorApi.Delete(id, json.ToString());
             WriteLine("Sensor Delete Success\n");
         }
 
 
         private async Task DeleteDriveway(string id) {
-            WriteLine($"Testing DELETE \"{Route}{Driveways.Route}/{id}\"");
+            WriteLine($"Testing DELETE '{_route}/{DrivewayApi.Path}/{id}'.");
 
-            await Driveways.Delete(id);
+            await _drivewayApi.Delete(id);
             WriteLine("Driveway Delete Success\n");
         }
 
 
         private async Task DeleteParkingLot(string id) {
-            WriteLine($"Testing DELETE \"{Route}{ParkingLots.Route}/{id}\"");
+            WriteLine($"Testing DELETE '{_route}/{ParkingLotApi.Path}/{id}'.");
 
-            await ParkingLots.Delete(id);
+            await _parkingLotApi.Delete(id);
             WriteLine("Parking Lot Delete Success\n");
         }
     }

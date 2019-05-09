@@ -28,20 +28,20 @@ namespace PlacePodApiClient.Lib {
         /// </summary>
         /// <param name="path">Path to be appended to the BaseRoute</param>
         /// <param name="body">JSON string payload</param>
-        Task<string> Post(string path, string body);
+        Task<string> Post(string path, string body = null);
 
         /// <summary>
         /// Method for making a HTTP 'Put' request to the API.
         /// </summary>
         /// <param name="path">Path to be appended to the BaseRoute</param>
         /// <param name="body">JSON string payload</param>
-        Task<string> Put(string path, string body);
+        Task<string> Put(string path, string body = null);
 
         /// <summary>
         /// Method for making a HTTP 'Delete' request to the API.
         /// </summary>
         /// <param name="path">Path to be appended to the BaseRoute</param>
         /// <param name="body">JSON string payload</param>
-        Task<string> Delete(string path, string body);
+        Task<string> Delete(string path, string body = null);
     }
 }

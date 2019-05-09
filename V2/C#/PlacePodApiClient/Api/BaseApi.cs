@@ -6,24 +6,21 @@ using Newtonsoft.Json;
 using PlacePodApiClient.Lib;
 
 namespace PlacePodApiClient.Api {
-
     /// <summary>
     /// Base class containing generic CRUD methods for resources.
     /// </summary>
     public abstract class BaseApi {
-
         /// <summary>
         /// The base path of the specific resource.
         /// </summary>
-        public readonly string Route;
+        private readonly string _path;
 
-        protected readonly IHttpAsync Http;
+        protected readonly IHttpAsync HttpAsync;
 
-        public BaseApi(IHttpAsync http, string route) {
-            Http = http;
-            Route = route;
+        protected BaseApi(IHttpAsync httpAsync, string path) {
+            HttpAsync = httpAsync;
+            _path = path;
         }
-
 
         /// <summary>
         /// Get all of the specific resource.
@@ -31,7 +28,7 @@ namespace PlacePodApiClient.Api {
         /// <typeparam name="T">Type of resource to get.</typeparam>
         public async Task<ICollection<T>> Get<T>() {
             try {
-                string response = await Http.Get(Route);
+                string response = await HttpAsync.Get($"/{_path}");
 
                 try {
                     return JsonConvert.DeserializeObject<ICollection<T>>(response);
@@ -45,7 +42,6 @@ namespace PlacePodApiClient.Api {
             }
         }
 
-
         /// <summary>
         /// Get a specific resource by id.
         /// </summary>
@@ -53,7 +49,7 @@ namespace PlacePodApiClient.Api {
         /// <param name="id">Id of the resource.</param>
         public async Task<T> Get<T>(string id) {
             try {
-                string response = await Http.Get($"{Route}/{id}");
+                string response = await HttpAsync.Get($"/{_path}/{id}");
 
                 try {
                     return JsonConvert.DeserializeObject<T>(response);
@@ -67,47 +63,41 @@ namespace PlacePodApiClient.Api {
             }
         }
 
-
         /// <summary>
         /// Create a new resource.
         /// </summary>
         /// <param name="json">Request json body.</param>
-        /// <returns></returns>
         public Task<string> Create(string json) {
             try {
-                return Http.Post(Route, json);
+                return HttpAsync.Post($"/{_path}", json);
             } catch {
                 Console.WriteLine($"Couldn't Create {GetType().Name.Replace("Api", "")}.");
                 throw;
             }
         }
 
-
         /// <summary>
-        /// Update a resource
+        /// Update a resource.
         /// </summary>
         /// <param name="id">Id of the resource.</param>
         /// <param name="json">Request json body.</param>
-        /// <returns></returns>
         public Task<string> Update(string id, string json) {
             try {
-                return Http.Put($"{Route}/{id}", json);
+                return HttpAsync.Put($"/{_path}/{id}", json);
             } catch {
                 Console.WriteLine($"Couldn't Update {GetType().Name.Replace("Api", "")}.");
                 throw;
             }
         }
 
-
         /// <summary>
-        /// Delete a resource
+        /// Delete a resource.
         /// </summary>
         /// <param name="id">Id of the resource.</param>
         /// <param name="json">Request json body.</param>
-        /// <returns></returns>
         public Task<string> Delete(string id, string json = null) {
             try {
-                return Http.Delete($"{Route}/{id}", json);
+                return HttpAsync.Delete($"/{_path}/{id}", json);
             } catch {
                 Console.WriteLine($"Couldn't Delete {GetType().Name.Replace("Api", "")}.");
                 throw;

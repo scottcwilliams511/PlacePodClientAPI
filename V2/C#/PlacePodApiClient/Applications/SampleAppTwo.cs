@@ -19,17 +19,17 @@ namespace PlacePodApiClient.Applications {
     /// </summary>
     public class SampleAppTwo {
 
-        private readonly SensorApi Sensors;
+        private readonly SensorApi _sensorApi;
 
-        private readonly SensorLogApi SensorLogs;
+        private readonly SensorLogApi _sensorLogApi;
 
-        private readonly string Route;
+        private readonly string _route;
 
 
         public SampleAppTwo(IHttpAsync http) {
-            Sensors = new SensorApi(http);
-            SensorLogs = new SensorLogApi(http);
-            Route = http.BaseRoute;
+            _sensorApi = new SensorApi(http);
+            _sensorLogApi = new SensorLogApi(http);
+            _route = http.BaseRoute;
         }
 
 
@@ -113,11 +113,11 @@ namespace PlacePodApiClient.Applications {
 
                 ICollection<SensorLog> sensorLogs;
                 if (id == null) {
-                    WriteLine($"Testing GET \"{Route}{SensorLogs.Route}/{start}/{end}\"");
-                    sensorLogs = await SensorLogs.GetSensorLogs(start, end);
+                    WriteLine($"Testing GET '{_route}/{SensorLogApi.Path}/{start}/{end}'.");
+                    sensorLogs = await _sensorLogApi.GetSensorLogs(start, end);
                 } else {
-                    WriteLine($"Testing GET \"{Route}{Sensors.Route}/{id}{SensorLogs.Route}/{start}/{end}\"");
-                    sensorLogs = await Sensors.GetSensorLogs(start, end, id);
+                    WriteLine($"Testing GET '{_route}/{SensorApi.Path}/{id}/{SensorLogApi.Path}/{start}/{end}'.");
+                    sensorLogs = await _sensorApi.GetSensorLogs(start, end, id);
                 }
                 
                 WriteLine($"Got {sensorLogs.Count} Sensor Logs:");
@@ -132,10 +132,10 @@ namespace PlacePodApiClient.Applications {
 
 
         private async Task Recalibrate(string id) {
-            WriteLine($"Testing POST \"{Route}{Sensors.Route}/{id}/recalibrate\"");
+            WriteLine($"Testing POST '{_route}/{SensorApi.Path}/{id}/recalibrate'.");
 
             try {
-                string response = await Sensors.Recalibrate(id);
+                string response = await _sensorApi.Recalibrate(id);
                 WriteLine($"Recalibrate Sent.\nNetwork response: {response}");
             } catch (Exception ex) {
                 WriteLine($"Method Error: {ex.Message}\n");
@@ -147,9 +147,9 @@ namespace PlacePodApiClient.Applications {
             WriteLine("Reboot sensor (y/n)? ");
             string input = ReadLine();
             if (input == "y" || input == "Y") {
-                WriteLine($"Testing POST \"{Route}{Sensors.Route}/{id}/reboot\"");
+                WriteLine($"Testing POST '.{_route}/{SensorApi.Path}/{id}/reboot'.");
                 try {
-                    string response = await Sensors.Reboot(id);
+                    string response = await _sensorApi.Reboot(id);
                     WriteLine($"Reboot Sent.\nNetwork response: {response}");
                 } catch (Exception ex) {
                     WriteLine($"Method Error: {ex.Message}\n");
@@ -162,9 +162,9 @@ namespace PlacePodApiClient.Applications {
             WriteLine("Deactivate sensor (y/n)? ");
             string input = ReadLine();
             if (input == "y" || input == "Y") {
-                WriteLine($"Testing POST \"{Route}{Sensors.Route}/{id}/deactivate\"");
+                WriteLine($"Testing POST '{_route}/{SensorApi.Path}/{id}/deactivate'.");
                 try {
-                    string response = await Sensors.Deactivate(id);
+                    string response = await _sensorApi.Deactivate(id);
                     WriteLine($"Deactivate Sent.\nNetwork response: {response}");
                 } catch (Exception ex) {
                     WriteLine($"Method Error: {ex.Message}\n");

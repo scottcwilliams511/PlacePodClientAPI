@@ -7,15 +7,21 @@ using PlacePodApiClient.Lib;
 using PlacePodApiClient.Models;
 
 namespace PlacePodApiClient.Api {
-
+    /// <summary>
+    /// Contains methods routes under the base route of '/parkingLots'.
+    /// </summary>
     public class ParkingLotApi: BaseApi {
+        public const string Path = "parkinglots";
 
-        public ParkingLotApi(IHttpAsync http) : base(http, "/parkinglots") { }
+        public ParkingLotApi(IHttpAsync httpAsync) : base(httpAsync, Path) { }
 
-
+        /// <summary>
+        /// Get all sensor that belong to the parking lot.
+        /// </summary>
+        /// <param name="id">Id of the parking lot.</param>
         public async Task<ICollection<Sensor>> GetSensors(string id) {
             try {
-                string response = await Http.Get($"{Route}/{id}/sensors");
+                string response = await HttpAsync.Get($"/{Path}/{id}/{SensorApi.Path}");
 
                 try {
                     return JsonConvert.DeserializeObject<ICollection<Sensor>>(response);
@@ -29,10 +35,13 @@ namespace PlacePodApiClient.Api {
             }
         }
 
-
+        /// <summary>
+        /// Get all driveways that belong to the parking lot.
+        /// </summary>
+        /// <param name="id">Id of the parking lot.</param>
         public async Task<ICollection<Driveway>> GetDriveways(string id) {
             try {
-                string response = await Http.Get($"{Route}/{id}/driveways");
+                string response = await HttpAsync.Get($"/{Path}/{id}/{DrivewayApi.Path}");
 
                 try {
                     return JsonConvert.DeserializeObject<ICollection<Driveway>>(response);

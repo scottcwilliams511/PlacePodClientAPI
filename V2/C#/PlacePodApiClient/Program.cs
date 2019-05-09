@@ -10,10 +10,10 @@ namespace PlacePodApiClient {
     /// Sample PlacePod Client Application. This contains two sub applications to test API features.
     /// More information can be found in files "SampleAppOne.cs" and "SampleAppTwo.cs"
     /// 
-    /// Implemented using Placepod API V2
+    /// Implemented using PlacePod API V2
     /// </summary>
     /// <author>Scott Williams swilliams@pnicorp.com</author>
-    public class Program {
+    public static class Program {
 
         /** Rest API is documented at https://api.pnicloud.com
          *
@@ -27,9 +27,8 @@ namespace PlacePodApiClient {
 
 
         /// <summary>
-        /// Api version. 
-        /// 
-        /// - Leave this as "v2" as long as this client is used for Placepod API V2.
+        /// <para>Api version.</para>
+        /// <para>- Leave this as "v2" as long as this client is used for PlacePod API V2.</para>
         /// </summary>
         private const string Version = "v2";
 
@@ -38,7 +37,9 @@ namespace PlacePodApiClient {
         /// Program entry point.
         /// </summary>
         public static async Task Main(string[] args) {
-            CheckVariables();
+            if (!CheckVariables()) {
+                return;
+            }
 
             IHttpAsync http = new HttpAsync($"{API_SERVER}/api/{Version}", API_KEY);
 
@@ -68,20 +69,21 @@ namespace PlacePodApiClient {
         /// <summary>
         /// Make sure these values are set. Program can't run without them!
         /// </summary>
-        private static void CheckVariables() {
+        private static bool CheckVariables() {
             if (string.IsNullOrWhiteSpace(API_SERVER)) {
                 Console.WriteLine("API_SERVER variable not set!");
                 Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
-                return;
+                return false;
             }
 
             if (string.IsNullOrWhiteSpace(API_KEY)) {
                 Console.WriteLine("API_KEY variable not set!");
                 Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
-                return;
+                return false;
             }
+            return true;
         }
     }
 }

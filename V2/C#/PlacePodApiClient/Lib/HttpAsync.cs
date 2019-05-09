@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace PlacePodApiClient.Lib {
-
     /// <summary>
     /// Class for making http requests. Inner logic is abstracted away so that 
     /// one only needs to initially pass in an API url and key. Then the appropriate
@@ -15,7 +14,6 @@ namespace PlacePodApiClient.Lib {
     /// Supports HTTP GET, POST, PUT, and DELETE methods.
     /// </summary>
     public class HttpAsync : IHttpAsync {
-
         /// <summary>
         /// Base URL of the PlacePod API
         /// </summary>
@@ -29,16 +27,18 @@ namespace PlacePodApiClient.Lib {
         /// <summary>
         /// Provides a base class for sending HTTP requests and receiving HTTP responses from a resource identified by a URI.
         /// </summary>
-        private readonly HttpClient client;
+        private readonly HttpClient _httpClient;
 
         /// <summary>
         /// Creates a new instance of HttpAsync. Both parameters should be provided.
         /// </summary>
+        /// <param name="baseRoute"></param>
+        /// <param name="apiKey"></param>
         public HttpAsync(string baseRoute, string apiKey) {
             BaseRoute = baseRoute;
             ApiKey = apiKey;
 
-            client = new HttpClient();
+            _httpClient = new HttpClient();
         }
 
 
@@ -46,7 +46,6 @@ namespace PlacePodApiClient.Lib {
         /// Method for making a HTTP 'Get' request to the API.
         /// </summary>
         /// <param name="path">Path to be appended to the BaseRoute</param>
-        /// <returns>Result of the request</returns>
         public Task<string> Get(string path) {
             return RequestAsync(path, null, "GET");
         }
@@ -57,8 +56,7 @@ namespace PlacePodApiClient.Lib {
         /// </summary>
         /// <param name="path">Path to be appended to the BaseRoute</param>
         /// <param name="body">JSON string payload</param>
-        /// <returns>Result of the request</returns>
-        public Task<string> Post(string path, string body) {
+        public Task<string> Post(string path, string body = null) {
             return RequestAsync(path, body, "POST");
         }
 
@@ -68,8 +66,7 @@ namespace PlacePodApiClient.Lib {
         /// </summary>
         /// <param name="path">Path to be appended to the BaseRoute</param>
         /// <param name="body">JSON string payload</param>
-        /// <returns>Result of the request</returns>
-        public Task<string> Put(string path, string body) {
+        public Task<string> Put(string path, string body = null) {
             return RequestAsync(path, body, "PUT");
         }
 
@@ -79,8 +76,7 @@ namespace PlacePodApiClient.Lib {
         /// </summary>
         /// <param name="path">Path to be appended to the BaseRoute</param>
         /// <param name="body">JSON string payload</param>
-        /// <returns>Result of the request</returns>
-        public Task<string> Delete(string path, string body) {
+        public Task<string> Delete(string path, string body = null) {
             return RequestAsync(path, body, "DELETE");
         }
 
@@ -91,7 +87,6 @@ namespace PlacePodApiClient.Lib {
         /// <param name="path">Route of API method to call</param>
         /// <param name="body">Optional JSON parameters to be sent</param>
         /// <param name="httpMethod">"GET", "POST", "PUT", or "DELETE"</param>
-        /// <returns>dynamic JArray</returns>
         private async Task<string> RequestAsync(string path, string body, string httpMethod) {
             try {
                 using (HttpRequestMessage request = new HttpRequestMessage()) {
@@ -108,7 +103,7 @@ namespace PlacePodApiClient.Lib {
                         request.Content = new StringContent(body, Encoding.UTF8, "application/json");
                     }
 
-                    using (HttpResponseMessage response = await client.SendAsync(request)) {
+                    using (HttpResponseMessage response = await _httpClient.SendAsync(request)) {
                         string responseMsg = await response.Content.ReadAsStringAsync();
 
                         int status = (int)response.StatusCode;
