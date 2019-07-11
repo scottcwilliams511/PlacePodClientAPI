@@ -210,36 +210,6 @@ namespace PlacePodApiClient.Api {
 
 
         /// <summary>
-        /// Turns on state reporting for car entering/leaving.
-        /// Route: '/api/sensor/enable-transition-state-reporting'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        public static Task<string> EnableTransitionStateReporting(string json) {
-            try {
-                return http.Post("/api/sensor/enable-transition-state-reporting", json);
-            } catch {
-                Console.WriteLine("Couldn't send enable transition state reporting request");
-                throw;
-            }
-        }
-
-
-        /// <summary>
-        /// Turns off state reporting for a car entering/leaving.
-        /// Route: '/api/sensor/disable-transition-state-reporting'
-        /// </summary>
-        /// <param name="json">JSON string</param>
-        public static Task<string> DisableTransitionStateReporting(string json) {
-            try {
-                return http.Post("/api/sensor/disable-transition-state-reporting", json);
-            } catch {
-                Console.WriteLine("Couldn't send disable transition state reporting request");
-                throw;
-            }
-        }
-
-
-        /// <summary>
         /// Sets the time period in minutes for how long the sensor will sleep before waking up.
         /// Route: '/api/sensor/set-lora-wakeup-interval'
         /// </summary>

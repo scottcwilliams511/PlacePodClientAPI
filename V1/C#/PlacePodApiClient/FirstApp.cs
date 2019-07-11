@@ -117,7 +117,7 @@ namespace PlacePodApiClient {
         private static async Task GetGateways() {
             Console.WriteLine("Testing '/api/gateways'");
 
-            List<Gateway> gateways = await GatewayMethods.GetGateways();
+            List<Gateway> gateways = await GatewayApi.GetGateways();
             Console.WriteLine("Got " + gateways.Count + " Gateways:");
 
             foreach (Gateway gateway in gateways) {
@@ -197,6 +197,8 @@ namespace PlacePodApiClient {
                 ["parkingSpace"] = "TEST: c#-api-sensor-insert",
                 ["parkingLotId"] = parkingLotId,
                 ["network"] = "PNI",
+                ["appEui"] = "0000000000000000",
+                ["appKey"] = "00000000000000000000000000000000",
                 ["disabled"] = false,
                 ["latitude"] = 33,
                 ["longitude"] = -111
@@ -244,11 +246,11 @@ namespace PlacePodApiClient {
                 ["parkingLotId"] = parkingLotId
             };
 
-            await GatewayMethods.InsertGateway(json.ToString());
+            await GatewayApi.InsertGateway(json.ToString());
             Console.WriteLine("Gateway Insert Success");
 
             // Get the gateway Id of the inserted gateway
-            List<Gateway> gateways = await GatewayMethods.GetGateways();
+            List<Gateway> gateways = await GatewayApi.GetGateways();
 
             string gatewayId = null;
             foreach (Gateway gateway in gateways) {
@@ -275,7 +277,7 @@ namespace PlacePodApiClient {
                 ["gatewayName"] = "TEST: C#-api-gateway-update"
             };
             
-            await GatewayMethods.UpdateGateway(json.ToString());
+            await GatewayApi.UpdateGateway(json.ToString());
             Console.WriteLine("Gateway Update Success\n");
         }
 
@@ -292,7 +294,7 @@ namespace PlacePodApiClient {
                 ["id"] = gatewayId
             };
 
-            await GatewayMethods.RemoveGateway(json.ToString());
+            await GatewayApi.RemoveGateway(json.ToString());
             Console.WriteLine("Gateway Remove Success\n");
         }
 

@@ -44,7 +44,6 @@ namespace PlacePodApiClient.Api {
                 Console.WriteLine("Couldn't Insert Parking Lot");
                 throw;
             }
-            
         }
 
 

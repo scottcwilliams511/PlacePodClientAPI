@@ -12,7 +12,7 @@ namespace PlacePodApiClient.Api {
     /// Layer that attempts to abstract the http calls to the API.
     /// Contains all of the API methods related to a gateway
     /// </summary>
-    internal static class GatewayMethods {
+    internal static class GatewayApi {
 
         private static HttpAsync http = Program.http;
 

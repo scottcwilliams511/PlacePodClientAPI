@@ -22,12 +22,10 @@ namespace PlacePodApiClient {
     ///   4) Send a ping and wait for response (up to 5 minutes)
     ///   5) Send a force vacant request
     ///   6) Send a force occupied request
-    ///   7) Send an enable transition state reporting request
-    ///   8) Send a disable transition state reporting request
-    ///   9) Send a set lora wakeup interval to 5 minutes request
-    ///  10) Send a set loRa Tx power call to 11dB request
-    ///  11) Send a set Tx spreading factor call to SF 7, BW 125 kHz request
-    ///  12) Send a set frequency sub band call to 902.3 kHz - 903.7 kHz - 125k request
+    ///   7) Send a set lora wakeup interval to 5 minutes request
+    ///   8) Send a set loRa Tx power call to 11dB request
+    ///   9) Send a set Tx spreading factor call to SF 7, BW 125 kHz request
+    ///  10) Send a set frequency sub band call to 902.3 kHz - 903.7 kHz - 125k request
     /// Please note that steps 10, 11, 12 are potentially dangerous if set incorrectly and
     /// may cause the placePod to go offline permanently. Please read available documentation
     /// on the API swagger page first!
@@ -76,8 +74,6 @@ namespace PlacePodApiClient {
                 await FullPingTest(sensorId);
                 await ForceVacant(sensorId);
                 await ForceOccupied(sensorId);
-                await EnableTransitionStateReporting(sensorId);
-                await DisableTransitionStateReporting(sensorId);
                 await SetWakeupInterval(sensorId);
                 await SetTxPower(sensorId);
                 await SetSpreadFactor(sensorId);
@@ -311,61 +307,6 @@ namespace PlacePodApiClient {
                     await SensorApi.ForceOccupied(json.ToString());
 
                     Console.WriteLine("Force Occupied Sent" + "\n");
-                } catch (Exception ex) {
-                    Console.WriteLine("Method Error: " + ex.Message + "\n");
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Enables transition state reporting for the sensor
-        /// </summary>
-        private static async Task EnableTransitionStateReporting(string sensorId) {
-            Console.WriteLine("Test /api/sensor/enable-transition-state-reporting");
-            Console.WriteLine("Enable transition state reporting (y/n)?");
-            string input = Console.ReadLine();
-            if (input == "y" || input == "Y") {
-
-                // Sample JSON to send
-                JObject json = new JObject {
-                    ["sensorId"] = sensorId
-                };
-
-                try {
-                    Console.WriteLine("Sending enable transition state reporting...");
-
-                    await SensorApi.EnableTransitionStateReporting(json.ToString());
-
-                    Console.WriteLine("Enable transition state reporting Sent" + "\n");
-                } catch (Exception ex) {
-                    Console.WriteLine("Method Error: " + ex.Message + "\n");
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Disables transition state reporting for the sensor
-        /// </summary>
-        /// <returns></returns>
-        private static async Task DisableTransitionStateReporting(string sensorId) {
-            Console.WriteLine("Test /api/sensor/disable-transition-state-reporting");
-            Console.WriteLine("Disable transition state reporting (y/n)?");
-            string input = Console.ReadLine();
-            if (input == "y" || input == "Y") {
-
-                // Sample JSON to send
-                JObject json = new JObject {
-                    ["sensorId"] = sensorId
-                };
-
-                try {
-                    Console.WriteLine("Sending disable transition state reporting...");
-
-                    await SensorApi.DisableTransitionStateReporting(json.ToString());
-
-                    Console.WriteLine("Disable transition state reporting Sent" + "\n");
                 } catch (Exception ex) {
                     Console.WriteLine("Method Error: " + ex.Message + "\n");
                 }
